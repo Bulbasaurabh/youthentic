@@ -12,7 +12,7 @@ app = FastAPI()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
-FRONTEND_URL = os.getenv("FRONTEND_URL")
+FRONTEND_URL = "http://localhost:3000"
 
 app.add_middleware(
     CORSMiddleware,
