@@ -1008,7 +1008,7 @@ const Home = () => {
             <button className="yt-btn-yellow" onClick={scrollToScents}>
               Explore Scents →
             </button>
-            <Link to="/about" className="yt-btn-ghost">Our Story</Link>
+            
           </div>
         </div>
 
