@@ -18,6 +18,7 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 # Allow both local dev and production frontend
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://youthentic-sg.netlify.app",
     FRONTEND_URL,
 ]
 
