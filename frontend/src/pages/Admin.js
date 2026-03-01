@@ -479,15 +479,15 @@ const Admin = () => {
 
         {/* TOPBAR */}
         <div className="ad-topbar">
-          <div className="ad-topbar__brand">YOUTHENTIC <span>ADMIN</span></div>
+          
           <div className="ad-topbar__right">
            
-            <button className="ad-refresh" onClick={fetchOrders}>↻ Refresh</button>
+            
           </div>
         </div>
 
         <div className="ad-body">
-
+          <button className="ad-refresh" onClick={fetchOrders}>↻ Refresh</button>
           {/* KPI STRIP */}
           <div className="ad-kpis">
             {[
