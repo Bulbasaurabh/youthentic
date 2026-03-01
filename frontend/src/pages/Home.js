@@ -965,20 +965,7 @@ const Home = () => {
       {/* inject styles */}
       <style>{css}</style>
 
-      {/* ── NAV ───────────────────────────────────────────────────── */}
-      <nav className={`yt-nav${scrolled ? " scrolled" : ""}`}>
-        <Link to="/" className="yt-nav__logo">YOUTHENTIC</Link>
-        <ul className="yt-nav__links">
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/about">About</Link></li>
-          <li><Link to="/products">Products</Link></li>
-          <li><Link to="/faq">FAQs</Link></li>
-          <li><Link to="/contact">Contact</Link></li>
-        </ul>
-        <Link to="/products" className="yt-nav__cta">
-          🛍 Shop Now
-        </Link>
-      </nav>
+
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
       <section className="yt-hero">
@@ -1226,9 +1213,9 @@ const Home = () => {
         <span className="yt-footer__brand">YOUTHENTIC</span>
         <ul className="yt-footer__links">
           <li><Link to="/products">Shop</Link></li>
-          <li><Link to="/about">About</Link></li>
+          <li><Link to="/brand-story">About</Link></li>
           <li><Link to="/loyalty">Rewards</Link></li>
-          <li><Link to="/contact">Contact</Link></li>
+          <li><Link to="/admin">Admin</Link></li>
         </ul>
         <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
       </footer>

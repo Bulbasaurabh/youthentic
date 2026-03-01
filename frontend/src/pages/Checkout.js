@@ -333,15 +333,18 @@ const Checkout = () => {
     setLoading(true);
     setError(null);
     try {
-      const stripe   = await stripePromise;
       const response = await API.post("/create-checkout-session", {
         items: cart,
         deliveryOption,
       });
-      await stripe.redirectToCheckout({ sessionId: response.data.id });
+      // redirectToCheckout is deprecated — use the session URL directly
+      const { url } = response.data;
+      if (!url) throw new Error("No checkout URL returned from server.");
+      window.location.href = url;
     } catch (err) {
       setError(
         err?.response?.data?.message ||
+        err?.message ||
         "Something went wrong. Please try again or contact support."
       );
       setLoading(false);

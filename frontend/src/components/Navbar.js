@@ -259,9 +259,10 @@ const css = `
 
 const NAV_LINKS = [
   { label: "Home",     href: "/" },
-  { label: "About",    href: "/about" },
+  { label: "About",    href: "/brand-story" },
   { label: "Products", href: "/products" },
   { label: "Scent Quiz",     href: "/quiz" },
+  { label: "Loyalty",     href: "/loyalty" },
 ];
 
 const Navbar = () => {

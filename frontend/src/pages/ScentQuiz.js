@@ -627,9 +627,9 @@ const ScentQuiz = () => {
           <span className="yt-footer__brand">YOUTHENTIC</span>
           <ul className="yt-footer__links">
             <li><Link to="/products">Shop</Link></li>
-            <li><Link to="/about">About</Link></li>
+            <li><Link to="/brand-story">About</Link></li>
             <li><Link to="/loyalty">Rewards</Link></li>
-            <li><Link to="/contact">Contact</Link></li>
+            <li><Link to="/Admin">Admin</Link></li>
           </ul>
           <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
         </footer>

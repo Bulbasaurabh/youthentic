@@ -441,9 +441,9 @@ const Products = () => {
         <span className="yt-footer__brand">YOUTHENTIC</span>
         <ul className="yt-footer__links">
           <li><a href="/products">Shop</a></li>
-          <li><a href="/about">About</a></li>
+          <li><a href="/brand-story">About</a></li>
           <li><a href="/loyalty">Rewards</a></li>
-          <li><a href="/contact">Contact</a></li>
+          <li><a href="/Admin">Admin</a></li>
         </ul>
         <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
       </footer>
