@@ -20,7 +20,12 @@ const css = `
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--black); color: var(--white); font-family: 'Jost', sans-serif; overflow-x: hidden; }
+  .ad-page {
+  min-height: 100vh;
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Jost', sans-serif;
+}
 
   /* ── PAGE ───────────────────────────────────────────────────────── */
   .ad-page { min-height: 100svh; background: var(--black); display: flex; flex-direction: column; }
