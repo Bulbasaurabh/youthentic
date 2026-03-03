@@ -29,12 +29,8 @@
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 .navbar {
@@ -67,7 +63,8 @@
   object-fit: cover;
 }
 
-button {
+/* Scoped to .page only — was global and overriding component styles in production */
+.page button {
   padding: 10px 15px;
   margin-top: 10px;
   cursor: pointer;
