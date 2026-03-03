@@ -22,21 +22,25 @@ function App() {
     <LoyaltyProvider>
       <CartProvider>
         <Router>
-          <Navbar />
-
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/brand-story" element={<BrandStory />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/quiz" element={<ScentQuiz />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/success" element={<Success />} />
-            <Route path="/cancel" element={<Cancel />} />
-            <Route path="/loyalty" element={<Loyalty />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/*" element={
+              <>
+                <Navbar />
+                <Routes>
+                  <Route path="/"            element={<Home />} />
+                  <Route path="/brand-story" element={<BrandStory />} />
+                  <Route path="/products"    element={<Products />} />
+                  <Route path="/quiz"        element={<ScentQuiz />} />
+                  <Route path="/cart"        element={<Cart />} />
+                  <Route path="/checkout"    element={<Checkout />} />
+                  <Route path="/success"     element={<Success />} />
+                  <Route path="/cancel"      element={<Cancel />} />
+                  <Route path="/loyalty"     element={<Loyalty />} />
+                </Routes>
+              </>
+            } />
           </Routes>
-
         </Router>
       </CartProvider>
     </LoyaltyProvider>

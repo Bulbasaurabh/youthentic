@@ -19,16 +19,16 @@ const css = `
     --amber:  #e8a84c;
   }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  .ad-page {
-  min-height: 100vh;
-  background: var(--black);
-  color: var(--white);
-  font-family: 'Jost', sans-serif;
-}
-
   /* ── PAGE ───────────────────────────────────────────────────────── */
-  .ad-page { min-height: 100svh; background: var(--black); display: flex; flex-direction: column; }
+  .ad-page {
+    min-height: 100vh;
+    background: #000000;
+    color: #FFFFFF;
+    font-family: 'Jost', sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
 
   /* ── TOPBAR ─────────────────────────────────────────────────────── */
   .ad-topbar {
