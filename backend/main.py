@@ -295,3 +295,17 @@ async def update_order(order_id: str, data: dict):
         raise HTTPException(status_code=404, detail="Order not found")
 
     return response.data[0]
+
+
+# Add this route to main.py
+
+@app.get("/orders")
+def get_orders_by_email(email: str):
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required")
+    response = supabase.table("orders") \
+        .select("*") \
+        .eq("email", email.lower().strip()) \
+        .order("created_at", desc=True) \
+        .execute()
+    return response.data

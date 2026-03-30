@@ -21,6 +21,7 @@ export const TIERS = [
       "1× points on every purchase",
       "Birthday bonus points",
       "Access to member-only drops",
+      "3x yearly free samples home delivered",
     ],
   },
   {
@@ -36,6 +37,7 @@ export const TIERS = [
       "Early access to new releases",
       "Free shipping on all orders",
       "Birthday bonus points",
+      "4x yearly free samples home delivered",
     ],
   },
   {
@@ -52,6 +54,7 @@ export const TIERS = [
       "Priority early access to all releases",
       "Free express shipping",
       "Dedicated Gold member support",
+      "5x yearly free samples home delivered",
     ],
   },
 ];

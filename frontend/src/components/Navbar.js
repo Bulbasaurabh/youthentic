@@ -263,6 +263,7 @@ const NAV_LINKS = [
   { label: "Products", href: "/products" },
   { label: "Scent Quiz",     href: "/quiz" },
   { label: "Loyalty",     href: "/loyalty" },
+  { label: "Orders",     href: "/login" },
 ];
 
 const Navbar = () => {

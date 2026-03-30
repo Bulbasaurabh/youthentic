@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useLoyalty, TIERS, getTierByPoints } from "../context/LoyaltyContext";
+import { useLoyalty} from "../context/LoyaltyContext";
+import Footer from "../components/Footer";
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
@@ -506,16 +506,8 @@ const Loyalty = () => {
         </section>
 
         {/* ── FOOTER ──────────────────────────────────────────────── */}
-        <footer className="yt-footer">
-          <span className="yt-footer__brand">YOUTHENTIC</span>
-          <ul className="yt-footer__links">
-            <li><Link to="/products">Shop</Link></li>
-            <li><Link to="/brand-story">About</Link></li>
-            <li><Link to="/quiz">Scent Quiz</Link></li>
-            <li><Link to="/admin">Admin</Link></li>
-          </ul>
-          <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
-        </footer>
+        {/* FOOTER */}
+      <Footer />
       </div>
     </>
   );

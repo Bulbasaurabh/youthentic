@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import Footer from "../components/Footer";
 
 /* ─── INJECT GLOBAL STYLES ─────────────────────────────────────── */
 const css = `
@@ -1208,17 +1209,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── FOOTER STRIP ──────────────────────────────────────────── */}
-      <footer className="yt-footer">
-        <span className="yt-footer__brand">YOUTHENTIC</span>
-        <ul className="yt-footer__links">
-          <li><Link to="/products">Shop</Link></li>
-          <li><Link to="/brand-story">About</Link></li>
-          <li><Link to="/loyalty">Rewards</Link></li>
-          <li><Link to="/admin">Admin</Link></li>
-        </ul>
-        <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
-      </footer>
+      {/* FOOTER */}
+      <Footer />
     </>
   );
 };

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Footer from "../components/Footer";
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
@@ -295,6 +296,70 @@ const css = `
 
   /* KEYFRAMES */
   @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+
+  /* ── FAQ ────────────────────────────────────────────────────────── */
+  .ab-faq {
+    padding: 6rem 3rem; border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 3rem;
+  }
+  .ab-faq__header { display: flex; flex-direction: column; gap: 0.75rem; }
+  .ab-faq__eyebrow { font-size: 0.65rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); }
+  .ab-faq__title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 5rem); letter-spacing: 0.04em; color: var(--white); line-height: 0.95;
+  }
+  .ab-faq__title span { color: var(--gold); }
+
+  /* category tabs */
+  .ab-faq__tabs { display: flex; gap: 0; flex-wrap: wrap; border: 1px solid var(--border); align-self: flex-start; }
+  .ab-faq__tab {
+    background: transparent; border: none; border-right: 1px solid var(--border);
+    color: var(--muted); font-family: 'Jost', sans-serif; font-size: 0.75rem;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 0.75rem 1.5rem;
+    cursor: pointer; transition: background 0.2s, color 0.2s; white-space: nowrap;
+  }
+  .ab-faq__tab:last-child { border-right: none; }
+  .ab-faq__tab:hover { color: var(--white); }
+  .ab-faq__tab.active { background: var(--gold); color: var(--black); }
+
+  /* accordion */
+  .ab-faq__list { display: flex; flex-direction: column; gap: 0; }
+  .ab-faq__item {
+    border: 1px solid var(--border); margin-bottom: -1px;
+    transition: border-color 0.25s;
+  }
+  .ab-faq__item.open { border-color: rgba(201,168,76,0.4); z-index: 1; position: relative; }
+  .ab-faq__question {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1.4rem 1.75rem; cursor: pointer; background: var(--dark);
+    transition: background 0.2s;
+  }
+  .ab-faq__question:hover { background: #0f0f0f; }
+  .ab-faq__item.open .ab-faq__question { background: rgba(201,168,76,0.04); }
+  .ab-faq__q-text {
+    font-family: 'Jost', sans-serif; font-size: 0.92rem; font-weight: 500;
+    color: var(--white); letter-spacing: 0.02em; line-height: 1.4;
+  }
+  .ab-faq__chevron {
+    color: var(--muted); font-size: 0.75rem; flex-shrink: 0;
+    transition: transform 0.3s, color 0.2s;
+  }
+  .ab-faq__item.open .ab-faq__chevron { transform: rotate(180deg); color: var(--gold); }
+  .ab-faq__answer {
+    padding: 0 1.75rem 1.5rem; font-size: 0.84rem; color: var(--muted);
+    line-height: 1.85; animation: faqSlide 0.25s ease;
+    border-top: 1px solid rgba(201,168,76,0.08);
+    padding-top: 1.25rem;
+  }
+
+  @keyframes faqSlide { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
+  @media (max-width: 768px) {
+    .ab-faq { padding: 4rem 1.5rem; }
+    .ab-faq__tabs { width: 100%; }
+    .ab-faq__tab { flex: 1; text-align: center; padding: 0.65rem 0.75rem; font-size: 0.65rem; }
+  }
+
   @keyframes fadeUp  { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
   @keyframes scrollLine {
     0%   { transform: scaleY(0); transform-origin: top; }
@@ -344,6 +409,90 @@ const useReveal = () => {
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, []);
+};
+
+
+/* ── FAQ DATA ────────────────────────────────────────────────────── */
+const FAQ_CATEGORIES = ["Product", "Shipping", "Usage", "Loyalty", "Other"];
+
+const FAQ_DATA = {
+  Product: [
+    { q: "What is Youthentic Lite?", a: "Youthentic Lite is our pocket-sized 10ml fragrance line — designed to be travel-friendly, MRT-safe, and easy to carry throughout your day without compromising on scent quality." },
+    { q: "Are Youthentic fragrances long-lasting?", a: "Yes. Our formulas are oil-based and heat-stabilised for Singapore's humidity. Depending on the scent and your skin type, you can expect 4–8 hours of wear from a single application." },
+    { q: "Are the products unisex?", a: "Most of our scents are designed to be unisex or gender-neutral. Each product page includes a gender recommendation to help you choose." },
+    { q: "Are Youthentic fragrances made in-house?", a: "Yes — every fragrance is formulated and produced by us in Indonesia, using high-quality imported raw materials sourced from Barcelona and Grasse, France." },
+    { q: "Are the products BPOM/HSA certified?", a: "Our products are produced under Indonesian BPOM-compliant standards. For Singapore customers, our formulas comply with HSA cosmetics regulations for personal fragrance." },
+    { q: "What sizes are available?", a: "We currently offer 10ml travel-size bottles and select scents in 50ml full-size. Bundle sets are also available exclusively on our website." },
+  ],
+  Shipping: [
+    { q: "How long does delivery take in Singapore?", a: "Standard islandwide delivery takes 3–5 business days. Self-collection is also available and is typically ready within 1–2 business days. You'll receive an email with details once your order is confirmed." },
+    { q: "Do you ship internationally?", a: "Currently, this Singapore store ships within Singapore only. For international orders, please visit our Indonesia site at youthentic.vercel.app." },
+    { q: "Are there any duties or hidden fees?", a: "No hidden fees. All prices are displayed in SGD and include GST. There are no additional duties for Singapore orders — what you see at checkout is what you pay." },
+    { q: "What are the shipping costs?", a: "Home delivery is a flat SGD 5.00. Orders with self-collection are free. We may offer free delivery promotions from time to time — check our homepage for the latest." },
+    { q: "Can I change my delivery address after ordering?", a: "Please contact us as soon as possible if you need to change your address. We can update it if your order hasn't been dispatched yet." },
+  ],
+  Usage: [
+    { q: "How do I apply the fragrance?", a: "Spray or dab onto pulse points — wrists, neck, and behind the ears. For longer wear, apply right after showering on moisturised skin. Avoid rubbing the fragrance after application as this breaks down the scent molecules." },
+    { q: "Can I layer fragrances?", a: "Absolutely. Many of our customers layer complementary scents from our collection. We recommend checking the fragrance notes on each product to find combinations that work well together." },
+    { q: "How should I store my fragrance?", a: "Store in a cool, dry place away from direct sunlight and heat. Avoid leaving bottles in a hot car or on a sunny windowsill, as this can degrade the fragrance over time." },
+    { q: "Is the fragrance suitable for sensitive skin?", a: "Our formulas are designed to be gentle, but we recommend patch testing on a small area if you have sensitive skin. Avoid direct contact with eyes." },
+  ],
+  Loyalty: [
+    { q: "How does the Youthentic Rewards program work?", a: "Every SGD you spend earns 1 loyalty point. Points accumulate toward tiers — Bronze (0–499 pts), Silver (500–1999 pts), and Gold (2000+ pts). Higher tiers unlock better multipliers and exclusive benefits." },
+    { q: "What are the Gold tier benefits?", a: "Gold members earn 2× points on every purchase, receive an automatic 10% discount on all orders, get priority early access to new releases, and enjoy free express shipping." },
+    { q: "Do my points expire?", a: "Points do not expire as long as your account remains active. We define active as making at least one purchase within any 12-month period." },
+    { q: "How do I check my points balance?", a: "Visit the Rewards page on our website after completing a purchase. Your points and current tier are displayed on your profile." },
+  ],
+  Other: [
+    { q: "What payment methods do you accept?", a: "We accept all major credit and debit cards (Visa, Mastercard, Amex), as well as PayNow and GrabPay via Stripe Checkout." },
+    { q: "Can I return or exchange a product?", a: "Due to the nature of fragrance products, we do not accept returns for change-of-mind purchases. However, if your product arrives damaged or defective, please contact us within 7 days of delivery and we will make it right." },
+    { q: "How do I contact Youthentic Singapore?", a: "You can reach us via the contact form on our website or email us at sg@youthentic.com. We typically respond within 1–2 business days." },
+    { q: "Is this an official Youthentic store?", a: "Yes — this is the official Youthentic Singapore store, operated in partnership with the Youthentic brand. Our Indonesia flagship site is at youthentic.vercel.app." },
+  ],
+};
+
+const FAQ = () => {
+  const [activeTab,  setActiveTab]  = useState("Product");
+  const [openIndex,  setOpenIndex]  = useState(null);
+
+  const questions = FAQ_DATA[activeTab] ?? [];
+
+  const toggle = (i) => setOpenIndex((prev) => (prev === i ? null : i));
+
+  return (
+    <section className="ab-faq">
+      <div className="ab-faq__header">
+        <p className="ab-faq__eyebrow">Got Questions?</p>
+        <h2 className="ab-faq__title">FREQUENTLY<br /><span>ASKED.</span></h2>
+      </div>
+
+      <div className="ab-faq__tabs">
+        {FAQ_CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            className={`ab-faq__tab${activeTab === cat ? " active" : ""}`}
+            onClick={() => { setActiveTab(cat); setOpenIndex(null); }}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <div className="ab-faq__list">
+        {questions.map((item, i) => (
+          <div key={i} className={`ab-faq__item${openIndex === i ? " open" : ""}`}>
+            <div className="ab-faq__question" onClick={() => toggle(i)}>
+              <span className="ab-faq__q-text">{item.q}</span>
+              <span className="ab-faq__chevron">▾</span>
+            </div>
+            {openIndex === i && (
+              <div className="ab-faq__answer">{item.a}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 };
 
 const BrandStory = () => {
@@ -519,17 +668,11 @@ const BrandStory = () => {
         <Link to="/products" className="yt-btn-yellow reveal">Find Your Scent →</Link>
       </section>
 
+      {/* FAQ */}
+      <FAQ />
+
       {/* FOOTER */}
-      <footer className="yt-footer">
-        <span className="yt-footer__brand">YOUTHENTIC</span>
-        <ul className="yt-footer__links">
-          <li><Link to="/products">Shop</Link></li>
-          <li><Link to="/brand-story">About</Link></li>
-          <li><Link to="/loyalty">Rewards</Link></li>
-          <li><Link to="/Admin">Admin</Link></li>
-        </ul>
-        <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
-      </footer>
+      <Footer />
     </>
   );
 };
