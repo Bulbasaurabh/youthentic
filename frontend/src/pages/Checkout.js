@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../context/CartContext";
+import Footer from "../components/Footer";
 import API from "../api/api";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
@@ -297,6 +298,21 @@ const css = `
   .yt-footer__copy { font-size: 0.72rem; color: rgba(136,136,136,0.5); }
 
   /* ── KEYFRAMES ──────────────────────────────────────────────────── */
+
+  /* ── SHIPPING INFO ──────────────────────────────────────────────── */
+  .co-shipping {
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border);
+  }
+  .co-shipping__item {
+    background: var(--dark); padding: 1.25rem 1.5rem;
+    display: flex; flex-direction: column; gap: 0.35rem;
+  }
+  .co-shipping__icon  { font-size: 1.1rem; }
+  .co-shipping__label { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+  .co-shipping__val   { font-size: 0.82rem; font-weight: 500; color: var(--white); line-height: 1.3; }
+  .co-shipping__sub   { font-size: 0.68rem; color: var(--muted); line-height: 1.5; }
+
   @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
   @keyframes spin   { to { transform: rotate(360deg); } }
 
@@ -560,17 +576,24 @@ const Checkout = () => {
           </div>
         </div>
 
-        {/* FOOTER */}
-        <footer className="yt-footer">
-          <span className="yt-footer__brand">YOUTHENTIC</span>
-          <ul className="yt-footer__links">
-            <li><Link to="/products">Shop</Link></li>
-            <li><Link to="/about">About</Link></li>
-            <li><Link to="/loyalty">Rewards</Link></li>
-          </ul>
-          <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
-        </footer>
+        {/* SHIPPING TRANSPARENCY */}
+        <div className="co-shipping">
+          {[
+            { icon: "🚚", label: "Home Delivery",    val: "3–5 Business Days",  sub: "Islandwide Singapore · SGD 5.00 flat" },
+            { icon: "📍", label: "Self Collection",  val: "1–2 Business Days",  sub: "Location confirmed via email after order" },
+            { icon: "💰", label: "No Hidden Duties", val: "SGD · GST Included", sub: "Checkout price is final — no surprises" },
+            { icon: "🔒", label: "Secure Payment",   val: "Stripe Checkout",    sub: "256-bit SSL · Visa · MC · Amex · PayNow" },
+          ].map((s) => (
+            <div key={s.label} className="co-shipping__item">
+              <span className="co-shipping__icon">{s.icon}</span>
+              <span className="co-shipping__label">{s.label}</span>
+              <span className="co-shipping__val">{s.val}</span>
+              <span className="co-shipping__sub">{s.sub}</span>
+            </div>
+          ))}
+        </div>
       </div>
+      <Footer />
     </>
   );
 };

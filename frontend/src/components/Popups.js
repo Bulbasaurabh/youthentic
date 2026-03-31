@@ -204,11 +204,11 @@ const MemberPopup = ({ onDismiss }) => {
           <span className="yt-member-popup__crown">✦</span>
           <p className="yt-member-popup__eyebrow">Youthentic Rewards</p>
           <h2 className="yt-member-popup__title">
-            EARN WITH<br /><span>EVERY DROP.</span>
+            FREE STRIPS<br /><span>WITH SIGNUP.</span>
           </h2>
           <p className="yt-member-popup__sub">
-            Join our loyalty program and earn points on every purchase.
-            Unlock exclusive tiers and members-only privileges.
+            Join our loyalty program to get THREE free test strips upon signup.
+            Earn points on every purchase to unlock exclusive tiers and members-only privileges.
           </p>
         </div>
 

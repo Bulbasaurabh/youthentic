@@ -444,7 +444,7 @@ const Loyalty = () => {
                         className="ly-tier-card__benefit"
                         style={{ color: isUnlocked ? "var(--white)" : "var(--muted)" }}
                       >
-                        <span style={{ color: isUnlocked ? t.color : "var(--muted)" }}>✓ </span>
+                        <span style={{ color: isUnlocked ? t.color : "var(--muted)" }}> </span>
                         {b}
                       </div>
                     ))}

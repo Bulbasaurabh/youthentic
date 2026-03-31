@@ -503,7 +503,7 @@ const ProductModal = ({ product, onClose }) => {
                   onClick={() => setVariant("10ml")}
                 >
                   <span className="yt-modal__vbtn-size">10ml</span>
-                  <span className="yt-modal__vbtn-price">SGD {Number(product.price).toFixed(0)}</span>
+                  <span className="yt-modal__vbtn-price">SGD {Number(product.price).toFixed(2)}</span>
                   <span className="yt-modal__vbtn-sub">Travel size</span>
                 </button>
                 <button
@@ -511,7 +511,7 @@ const ProductModal = ({ product, onClose }) => {
                   onClick={() => setVariant("50ml")}
                 >
                   <span className="yt-modal__vbtn-size">50ml</span>
-                  <span className="yt-modal__vbtn-price">SGD {Number(product.price_50ml).toFixed(0)}</span>
+                  <span className="yt-modal__vbtn-price">SGD {Number(product.price_50ml).toFixed(2)}</span>
                   <span className="yt-modal__vbtn-sub">Full size</span>
                 </button>
               </div>

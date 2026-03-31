@@ -1078,7 +1078,7 @@ const Home = () => {
       </section>
 
       {/* ── FEATURED SCENTS ───────────────────────────────────────── */}
-      <section className="yt-scents" ref={scentsRef}>
+      {/* <section className="yt-scents" ref={scentsRef}>
         <div className="yt-scents__header">
           <div>
             <p style={{ fontSize: "0.68rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "0.75rem" }}>
@@ -1119,7 +1119,7 @@ const Home = () => {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* ── SG DELIVERY ───────────────────────────────────────────── */}
       <section className="yt-delivery">
@@ -1175,9 +1175,9 @@ const Home = () => {
           </p>
           <div className="yt-loyalty__tiers">
             {[
-              { dot: "yt-tier-bronze", name: "Bronze", pts: "0 – 199 pts", benefit: "5% off" },
-              { dot: "yt-tier-silver", name: "Silver", pts: "200 – 499 pts", benefit: "10% + early access" },
-              { dot: "yt-tier-gold",   name: "Gold",   pts: "500+ pts",     benefit: "Free bottle / yr" },
+              { dot: "yt-tier-bronze", name: "Bronze", pts: "0 – 299 pts", benefit: "Free Sample w/ every purchase" },
+              { dot: "yt-tier-silver", name: "Silver", pts: "300 – 799 pts", benefit: "Early Access to latest fragrances" },
+              { dot: "yt-tier-gold",   name: "Gold",   pts: "800+ pts",     benefit: "Free Express Delivery" },
             ].map((t) => (
               <div key={t.name} className="yt-loyalty__tier">
                 <div className={`yt-loyalty__tier-dot ${t.dot}`} />
