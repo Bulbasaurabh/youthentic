@@ -1,6 +1,7 @@
+import {useState} from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import { useState } from "react";
+import { getRenewalStatus } from "../utils/loyaltyRenewal";
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
@@ -140,6 +141,58 @@ const css = `
   }
   .ord-back:hover { color: var(--gold); }
 
+  
+  /* ── RENEWAL CARD ───────────────────────────────────────────────── */
+  .ord-renewal {
+    border: 1px solid var(--border); background: var(--dark);
+    display: flex; flex-direction: column; gap: 0; overflow: hidden;
+  }
+  .ord-renewal__header {
+    padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 0.75rem; background: rgba(201,168,76,0.03);
+  }
+  .ord-renewal__title {
+    font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .ord-renewal__title::before { content: '✦'; font-size: 0.5rem; }
+  .ord-renewal__expiry {
+    font-size: 0.7rem; color: var(--muted);
+  }
+  .ord-renewal__expiry strong { color: var(--white); }
+  .ord-renewal__body { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .ord-renewal__bar-row {
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .ord-renewal__bar-labels {
+    display: flex; justify-content: space-between; font-size: 0.72rem;
+  }
+  .ord-renewal__bar-spent { color: var(--white); font-weight: 500; }
+  .ord-renewal__bar-req   { color: var(--muted); }
+  .ord-renewal__bar-track {
+    height: 3px; background: rgba(201,168,76,0.1); border-radius: 2px; overflow: hidden;
+  }
+  .ord-renewal__bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2));
+    transition: width 1s cubic-bezier(0.22,1,0.36,1);
+  }
+  .ord-renewal__bar-fill--safe   { background: linear-gradient(90deg, #6dbf82, #8fd4a0); }
+  .ord-renewal__bar-fill--danger { background: linear-gradient(90deg, #e05a4a, #e8804a); }
+  .ord-renewal__msg {
+    font-size: 0.76rem; line-height: 1.65; padding: 0.75rem 1rem;
+    border: 1px solid; border-radius: 2px;
+  }
+  .ord-renewal__msg--safe   { color: #6dbf82; border-color: rgba(109,191,130,0.3); background: rgba(109,191,130,0.06); }
+  .ord-renewal__msg--risk   { color: #e8a84c; border-color: rgba(232,168,76,0.3);  background: rgba(232,168,76,0.06); }
+  .ord-renewal__msg--danger { color: #e05a4a; border-color: rgba(224,90,74,0.3);   background: rgba(224,90,74,0.06); }
+  .ord-renewal__bronze {
+    padding: 1rem 1.5rem; font-size: 0.75rem; color: var(--muted); line-height: 1.6;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .ord-renewal__bronze::before { content: '🥉'; font-size: 1rem; }
+
+
   @keyframes ordSlideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
 
   @media (max-width: 768px) {
@@ -163,6 +216,17 @@ const statusClass = (s) => {
 };
 const statusLabel = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "Unknown";
 
+const getEarliestOrderDate = (orders) => {
+  const timestamps = (Array.isArray(orders) ? orders : [])
+    .map((o) => o?.created_at)
+    .filter(Boolean)
+    .map((ts) => new Date(ts))
+    .filter((d) => !Number.isNaN(d.getTime()));
+
+  if (timestamps.length === 0) return null;
+  return timestamps.reduce((min, d) => (d < min ? d : min), timestamps[0]).toISOString();
+};
+
 /* single expandable order card */
 const OrderCard = ({ order }) => {
   const [open, setOpen] = useState(false);
@@ -182,7 +246,7 @@ const OrderCard = ({ order }) => {
           <span className={statusClass(order.payment_status)}>
             {statusLabel(order.payment_status)}
           </span>
-          <span className="ord-card__amount">{fmt(order.total_amount / 100)}</span>
+          <span className="ord-card__amount">{fmt(order.total_amount)}</span>
           <span className={`ord-card__expand${open ? " open" : ""}`}>›</span>
         </div>
       </div>
@@ -208,6 +272,9 @@ const Orders = () => {
   const navigate   = useNavigate();
   const orders     = state?.orders ?? [];
   const email      = state?.email  ?? "";
+  const createdAt  = state?.createdAt ?? null;
+  const tier       = state?.tier ?? "Bronze";
+  const renewalStart = createdAt ?? getEarliestOrderDate(orders);
 
   // if navigated directly without state, send back to login
   if (!state) {
@@ -217,6 +284,8 @@ const Orders = () => {
 
   const totalSpent = orders.reduce((s, o) => s + (o.total_amount ?? 0), 0);
   const paidOrders = orders.filter((o) => ["paid","complete","succeeded"].includes((o.payment_status ?? "").toLowerCase()));
+  const renewal    = getRenewalStatus(tier, renewalStart, orders);
+  const displayTier = renewal?.tier ?? tier;
 
   return (
     <>
@@ -262,9 +331,60 @@ const Orders = () => {
               <div className="ord-summary__item">
                 <span className="ord-summary__label">Total Spent</span>
                 <span className="ord-summary__val" style={{ fontSize: "1.2rem" }}>
-                  {fmt(totalSpent / 100)}
+                  {fmt(totalSpent)}
                 </span>
               </div>
+            </div>
+
+            {/* RENEWAL STATUS CARD */}
+            <div className="ord-renewal">
+              {renewal ? (
+                <>
+                  <div className="ord-renewal__header">
+                    <span className="ord-renewal__title">{displayTier} Membership Renewal</span>
+                    <span className="ord-renewal__expiry">
+                      Renewal due <strong>{renewal.expiryDateStr}</strong> · {renewal.daysLeft} days left
+                    </span>
+                  </div>
+                  <div className="ord-renewal__body">
+                    <div className="ord-renewal__bar-row">
+                      <div className="ord-renewal__bar-labels">
+                        <span className="ord-renewal__bar-spent">SGD {renewal.spent.toFixed(2)} spent this window</span>
+                        <span className="ord-renewal__bar-req">SGD {renewal.rule.requiredSpend} required</span>
+                      </div>
+                      <div className="ord-renewal__bar-track">
+                        <div
+                          className={`ord-renewal__bar-fill${
+                            renewal.pct >= 100 ? " ord-renewal__bar-fill--safe"
+                            : renewal.daysLeft < 60 ? " ord-renewal__bar-fill--danger"
+                            : ""
+                          }`}
+                          style={{ width: `${renewal.pct}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className={`ord-renewal__msg${
+                      renewal.pct >= 100 ? " ord-renewal__msg--safe"
+                      : renewal.daysLeft < 60 ? " ord-renewal__msg--danger"
+                      : " ord-renewal__msg--risk"
+                    }`}>
+                      {renewal.pct >= 100
+                        ? `✓ ${displayTier} status secured until ${renewal.expiryDateStr}.`
+                        : renewal.daysLeft < 60
+                        ? `⚠ Only ${renewal.daysLeft} days left to spend SGD ${renewal.remaining.toFixed(2)} more and keep your ${displayTier} status.`
+                        : `Spend SGD ${renewal.remaining.toFixed(2)} more before ${renewal.expiryDateStr} to maintain ${displayTier}. If you don't, your tier will drop to ${renewal.rule.failTier}.`
+                      }
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="ord-renewal__bronze">
+                  {String(tier ?? "").toLowerCase() === "bronze"
+                    ? "You're on Bronze - no renewal required. Spend to earn points and unlock Silver or Gold."
+                    : "Renewal status is unavailable right now. Please try again in a moment."
+                  }
+                </div>
+              )}
             </div>
 
             {/* ORDER LIST */}

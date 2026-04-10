@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useLoyalty} from "../context/LoyaltyContext";
-import Footer from "../components/Footer";
+import { useLoyalty, TIERS, getTierByPoints } from "../context/LoyaltyContext";
+import { getRenewalStatus, RENEWAL_RULES } from "../utils/loyaltyRenewal";
+import API from "../api/api";
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
@@ -241,6 +243,109 @@ const css = `
   }
   .ly-step__sub { font-size: 0.8rem; color: var(--muted); line-height: 1.7; }
 
+
+  /* ── RENEWAL SECTION ────────────────────────────────────────────── */
+  .ly-renewal {
+    padding: 5rem 3rem; border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 3rem;
+  }
+  .ly-renewal__header { display: flex; flex-direction: column; gap: 0.75rem; }
+  .ly-renewal__eyebrow { font-size: 0.65rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); }
+  .ly-renewal__title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 5rem); letter-spacing: 0.04em; color: var(--white); line-height: 0.95;
+  }
+  .ly-renewal__title span { color: var(--gold); }
+  .ly-renewal__sub {
+    font-size: 0.85rem; color: var(--muted); line-height: 1.8; max-width: 58ch;
+  }
+
+  /* status card — shown if user has an email/orders loaded */
+  .ly-renewal__status {
+    border: 1px solid var(--border); background: var(--dark);
+    display: flex; flex-direction: column; gap: 0;
+    overflow: hidden;
+  }
+  .ly-renewal__status-header {
+    padding: 1.5rem 2rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  }
+  .ly-renewal__status-tier {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.08em;
+  }
+  .ly-renewal__status-expiry {
+    font-size: 0.72rem; letter-spacing: 0.08em; color: var(--muted);
+  }
+  .ly-renewal__status-expiry strong { color: var(--white); }
+  .ly-renewal__status-body { padding: 1.5rem 2rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* progress bar */
+  .ly-renewal__bar-labels {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 0.72rem; margin-bottom: 0.5rem;
+  }
+  .ly-renewal__bar-spent { color: var(--white); font-weight: 500; }
+  .ly-renewal__bar-required { color: var(--muted); }
+  .ly-renewal__bar-track {
+    height: 4px; background: rgba(201,168,76,0.1); border-radius: 2px; overflow: hidden;
+  }
+  .ly-renewal__bar-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    transition: width 1s cubic-bezier(0.22,1,0.36,1);
+  }
+  .ly-renewal__bar-fill--safe  { background: linear-gradient(90deg, #6dbf82, #8fd4a0); }
+  .ly-renewal__bar-fill--risk  { background: linear-gradient(90deg, #e8a84c, var(--gold)); }
+  .ly-renewal__bar-fill--danger{ background: linear-gradient(90deg, #e05a4a, #e8804a); }
+
+  .ly-renewal__hint {
+    font-size: 0.78rem; line-height: 1.6; padding: 0.9rem 1.1rem;
+    border: 1px solid; border-radius: 2px;
+  }
+  .ly-renewal__hint--safe   { color: #6dbf82; border-color: rgba(109,191,130,0.3); background: rgba(109,191,130,0.06); }
+  .ly-renewal__hint--risk   { color: #e8a84c; border-color: rgba(232,168,76,0.3); background: rgba(232,168,76,0.06); }
+  .ly-renewal__hint--danger { color: #e05a4a; border-color: rgba(224,90,74,0.3); background: rgba(224,90,74,0.06); }
+
+  /* rules table */
+  .ly-renewal__rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); }
+  .ly-renewal__rule {
+    background: var(--dark); padding: 2rem;
+    display: flex; flex-direction: column; gap: 1rem;
+    transition: background 0.25s;
+  }
+  .ly-renewal__rule:hover { background: var(--panel); }
+  .ly-renewal__rule-head { display: flex; align-items: center; gap: 1rem; }
+  .ly-renewal__rule-icon { font-size: 1.5rem; }
+  .ly-renewal__rule-tier {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.08em;
+  }
+  .ly-renewal__rule-body { display: flex; flex-direction: column; gap: 0.6rem; }
+  .ly-renewal__rule-req {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;
+    letter-spacing: 0.05em; color: var(--gold); line-height: 1;
+  }
+  .ly-renewal__rule-period { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .ly-renewal__rule-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.7; }
+  .ly-renewal__rule-fail {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.7rem; color: var(--muted); padding: 0.6rem 0.9rem;
+    border: 1px solid rgba(201,168,76,0.1); background: rgba(0,0,0,0.3);
+  }
+  .ly-renewal__rule-fail::before { content: '⚠'; font-size: 0.7rem; }
+
+  .ly-renewal__note {
+    font-size: 0.75rem; color: var(--muted); line-height: 1.8; padding: 1.25rem 1.5rem;
+    border: 1px solid var(--border); background: var(--dark);
+    display: flex; gap: 0.75rem;
+  }
+  .ly-renewal__note::before { content: '✦'; color: var(--gold); font-size: 0.55rem; flex-shrink: 0; margin-top: 0.2rem; }
+
+  @media (max-width: 768px) {
+    .ly-renewal { padding: 3.5rem 1.5rem; }
+    .ly-renewal__rules { grid-template-columns: 1fr; }
+    .ly-renewal__status-header { flex-direction: column; align-items: flex-start; }
+  }
+
   /* ── CTA ────────────────────────────────────────────────────────── */
   .ly-cta {
     padding: 6rem 3rem; text-align: center;
@@ -306,7 +411,22 @@ const css = `
 const TIER_ICONS = { Bronze: "🥉", Silver: "🥈", Gold: "🏆" };
 
 const Loyalty = () => {
-  const { points, tier, tierData, nextTier, TIERS } = useLoyalty();
+  const { points, tier, tierData, nextTier, TIERS, email } = useLoyalty();
+  const [orders,   setOrders]   = useState([]);
+  const [createdAt, setCreatedAt] = useState(null);
+
+  // fetch orders to compute renewal spend — uses email from LoyaltyContext
+  useEffect(() => {
+    if (!email) return;
+    API.get(`/orders?email=${encodeURIComponent(email)}`)
+      .then((res) => setOrders(res.data))
+      .catch(() => {});
+    API.get(`/users/loyalty?email=${encodeURIComponent(email)}`)
+      .then((res) => setCreatedAt(res.data.created_at ?? null))
+      .catch(() => {});
+  }, [email]);
+
+  const renewal = getRenewalStatus(tier, createdAt, orders);
 
   // progress toward next tier
   const progressPct = nextTier
@@ -444,7 +564,7 @@ const Loyalty = () => {
                         className="ly-tier-card__benefit"
                         style={{ color: isUnlocked ? "var(--white)" : "var(--muted)" }}
                       >
-                        <span style={{ color: isUnlocked ? t.color : "var(--muted)" }}> </span>
+                        <span style={{ color: isUnlocked ? t.color : "var(--muted)" }}>✓ </span>
                         {b}
                       </div>
                     ))}
@@ -472,7 +592,7 @@ const Loyalty = () => {
               {
                 num: "02", icon: "📈",
                 label: "Climb the Tiers",
-                sub:   "Reach 500 points for Silver, 2,000 for Gold. Your tier is updated automatically after each qualifying purchase.",
+                sub:   "Reach 120 points for Silver, 500 for Gold. Your tier is updated automatically after each qualifying purchase.",
               },
               {
                 num: "03", icon: "✦",
@@ -487,6 +607,106 @@ const Loyalty = () => {
                 <p className="ly-step__sub">{s.sub}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+
+        {/* ── RENEWAL SECTION ─────────────────────────────────────── */}
+        <section className="ly-renewal">
+          <div className="ly-renewal__header">
+            <p className="ly-renewal__eyebrow">Membership Maintenance</p>
+            <h2 className="ly-renewal__title">KEEP YOUR<br /><span>STATUS.</span></h2>
+            <p className="ly-renewal__sub">
+              To maintain Silver or Gold status, you need to meet a minimum spend
+              every 2 years from your sign-up date. If you don't hit the threshold,
+              your tier drops and points are adjusted accordingly.
+            </p>
+          </div>
+
+          {/* personal status card — only if we have their data */}
+          {renewal && (
+            <div className="ly-renewal__status">
+              <div className="ly-renewal__status-header">
+                <span className="ly-renewal__status-tier" style={{ color: tierData.color }}>
+                  {tier} Renewal Status
+                </span>
+                <span className="ly-renewal__status-expiry">
+                  Window closes <strong>{renewal.expiryDateStr}</strong>
+                  {" "}· {renewal.daysLeft} days left
+                </span>
+              </div>
+              <div className="ly-renewal__status-body">
+                <div>
+                  <div className="ly-renewal__bar-labels">
+                    <span className="ly-renewal__bar-spent">
+                      SGD {renewal.spent.toFixed(2)} spent
+                    </span>
+                    <span className="ly-renewal__bar-required">
+                      SGD {renewal.rule.requiredSpend} required
+                    </span>
+                  </div>
+                  <div className="ly-renewal__bar-track">
+                    <div
+                      className={`ly-renewal__bar-fill${
+                        renewal.pct >= 100 ? " ly-renewal__bar-fill--safe"
+                        : renewal.daysLeft < 60 ? " ly-renewal__bar-fill--danger"
+                        : " ly-renewal__bar-fill--risk"
+                      }`}
+                      style={{ width: `${renewal.pct}%` }}
+                    />
+                  </div>
+                </div>
+                <div className={`ly-renewal__hint${
+                  renewal.pct >= 100 ? " ly-renewal__hint--safe"
+                  : renewal.daysLeft < 60 ? " ly-renewal__hint--danger"
+                  : " ly-renewal__hint--risk"
+                }`}>
+                  {renewal.pct >= 100
+                    ? `✓ You've met the ${tier} renewal requirement. Your status is secure until ${renewal.expiryDateStr}.`
+                    : renewal.daysLeft < 60
+                    ? `⚠ Only ${renewal.daysLeft} days left! Spend SGD ${renewal.remaining.toFixed(2)} more to keep your ${tier} status.`
+                    : `Spend SGD ${renewal.remaining.toFixed(2)} more before ${renewal.expiryDateStr} to maintain your ${tier} membership.`
+                  }
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* rules for both tiers */}
+          <div className="ly-renewal__rules">
+            {[
+              {
+                icon: "🥈", tier: "Silver", color: "#a8a9ad",
+                req: "SGD 119", period: "Every 2 years",
+                desc: "Spend SGD 119 or more within your 2-year window to keep Silver status and your accumulated points.",
+                fail: "Drops to Bronze · All points reset to 0",
+              },
+              {
+                icon: "🏆", tier: "Gold", color: "#C9A84C",
+                req: "SGD 250", period: "Every 2 years",
+                desc: "Spend SGD 250 or more within your 2-year window to maintain Gold status and full benefits.",
+                fail: "Drops to Silver · Points adjusted to 120",
+              },
+            ].map((r) => (
+              <div key={r.tier} className="ly-renewal__rule">
+                <div className="ly-renewal__rule-head">
+                  <span className="ly-renewal__rule-icon">{r.icon}</span>
+                  <span className="ly-renewal__rule-tier" style={{ color: r.color }}>{r.tier}</span>
+                </div>
+                <div className="ly-renewal__rule-body">
+                  <span className="ly-renewal__rule-req">{r.req}</span>
+                  <span className="ly-renewal__rule-period">{r.period} · From Sign-up Date</span>
+                  <p className="ly-renewal__rule-desc">{r.desc}</p>
+                  <div className="ly-renewal__rule-fail">{r.fail}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="ly-renewal__note">
+            Your 2-year window is calculated from the date you first signed up.
+            Spending is counted from paid orders only. The window renews automatically
+            at the 2-year mark — you don't need to do anything.
           </div>
         </section>
 
@@ -506,8 +726,16 @@ const Loyalty = () => {
         </section>
 
         {/* ── FOOTER ──────────────────────────────────────────────── */}
-        {/* FOOTER */}
-      <Footer />
+        <footer className="yt-footer">
+          <span className="yt-footer__brand">YOUTHENTIC</span>
+          <ul className="yt-footer__links">
+            <li><Link to="/products">Shop</Link></li>
+            <li><Link to="/about">About</Link></li>
+            <li><Link to="/quiz">Scent Quiz</Link></li>
+            <li><Link to="/contact">Contact</Link></li>
+          </ul>
+          <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
+        </footer>
       </div>
     </>
   );

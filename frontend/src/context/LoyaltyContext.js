@@ -63,7 +63,18 @@ export const TIERS = [
   },
 ];
 
-export const getTierByName   = (name) => TIERS.find((t) => t.name === name) ?? TIERS[0];
+export const normalizeTierName = (name) => {
+  const raw = String(name ?? "").trim().toLowerCase();
+  if (raw === "gold") return "Gold";
+  if (raw === "silver") return "Silver";
+  if (raw === "bronze") return "Bronze";
+  return null;
+};
+
+export const getTierByName   = (name) => {
+  const normalized = normalizeTierName(name);
+  return TIERS.find((t) => t.name === normalized) ?? TIERS[0];
+};
 export const getTierByPoints = (pts)  => TIERS.slice().reverse().find((t) => pts >= t.min) ?? TIERS[0];
 export const getNextTier     = (pts)  => {
   const idx = TIERS.findIndex((t) => t.name === getTierByPoints(pts).name);
@@ -73,10 +84,12 @@ export const getNextTier     = (pts)  => {
 export const LoyaltyProvider = ({ children }) => {
   const [points,  setPoints]  = useState(0);
   const [email,   setEmail]   = useState(null);
+  const [tierOverride, setTierOverride] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Derived from points — single source of truth
-  const tierData = getTierByPoints(points);
+  // Prefer backend tier when present; fall back to points-derived tier.
+  const tierFromPoints = getTierByPoints(points);
+  const tierData = tierOverride ? getTierByName(tierOverride) : tierFromPoints;
   const nextTier = getNextTier(points);
   const tier     = tierData.name; // string, matches DB column
 
@@ -88,8 +101,10 @@ export const LoyaltyProvider = ({ children }) => {
     try {
       const res = await API.get(`/users/loyalty?email=${encodeURIComponent(userEmail)}`);
       setPoints(res.data.loyalty_points ?? 0);
+      setTierOverride(normalizeTierName(res.data.tier));
     } catch (e) {
       console.error("Loyalty fetch failed", e);
+      setTierOverride(null);
     } finally {
       setLoading(false);
     }
@@ -109,6 +124,7 @@ export const LoyaltyProvider = ({ children }) => {
 
     // Derive new tier from new total
     const newTierName = getTierByPoints(newTotal).name;
+    setTierOverride(newTierName);
 
     if (email) {
       try {
@@ -121,6 +137,7 @@ export const LoyaltyProvider = ({ children }) => {
       } catch (e) {
         console.error("Loyalty earn failed", e);
         setPoints(points); // rollback on error
+        setTierOverride(normalizeTierName(tier));
       }
     }
 
@@ -131,7 +148,9 @@ export const LoyaltyProvider = ({ children }) => {
   const redeemPoints = useCallback(async (pointsToRedeem) => {
     if (pointsToRedeem > points) return false;
     const newTotal = points - pointsToRedeem;
+    const newTierName = getTierByPoints(newTotal).name;
     setPoints(newTotal);
+    setTierOverride(newTierName);
 
     if (email) {
       try {
@@ -139,11 +158,12 @@ export const LoyaltyProvider = ({ children }) => {
           email,
           points_to_redeem: pointsToRedeem,
           new_total:        newTotal,
-          new_tier:         getTierByPoints(newTotal).name,
+          new_tier:         newTierName,
         });
       } catch (e) {
         console.error("Loyalty redeem failed", e);
         setPoints(points); // rollback
+        setTierOverride(normalizeTierName(tier));
         return false;
       }
     }

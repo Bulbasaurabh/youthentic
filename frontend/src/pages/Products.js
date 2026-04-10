@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState, useMemo,useCallback  } from "react";
+import { useCart } from "../context/CartContext";
 import Footer from "../components/Footer";
 import API from "../api/api";
 import ProductCard from "../components/ProductCard";
@@ -27,7 +27,7 @@ const WEEKEND_DROP_PRODUCTS = [
 const ACCESSORIES = [
   {
     id: "acc-1",
-    name: "Plain Sleeve — Midnight Black",
+    name: "Plain Sleeve (Midnight Black)",
     desc: "Minimalist matte black sleeve. Fits all 10ml bottles.",
     price: "SGD 4.90",
     tag: "Bestseller",
@@ -36,7 +36,7 @@ const ACCESSORIES = [
   },
   {
     id: "acc-2",
-    name: "Plain Sleeve — Pearl White",
+    name: "Plain Sleeve (Pearl White)",
     desc: "Clean white sleeve with subtle texture. Fits all 10ml bottles.",
     price: "SGD 4.90",
     tag: null,
@@ -45,16 +45,43 @@ const ACCESSORIES = [
   },
   {
     id: "acc-3",
-    name: "Plain Sleeve — Brushed Gold",
-    desc: "Premium gold-tone sleeve for a luxe finish.",
+    name: "Plain Sleeve (Wine Red)",
+    desc: "Premium wine red sleeve for a luxurious finish.",
+    price: "SGD 5.90",
+    tag: null,
+    emoji: "✨",
+    collab: null,
+  },
+  {
+    id: "acc-4",
+    name: "Floral Sleeve (Sky Blue)",
+    desc: "A refreshing sky blue sleeve with a floral design.",
     price: "SGD 5.90",
     tag: "Premium",
     emoji: "✨",
     collab: null,
   },
   {
-    id: "acc-4",
-    name: "PopMart × Youthentic Sleeve",
+    id: "acc-5",
+    name: "Floral Sleeve (White)",
+    desc: "A clean white sleeve with a floral design.",
+    price: "SGD 5.90",
+    tag: "Premium",
+    emoji: "✨",
+    collab: null,
+  },
+  {
+    id: "acc-6",
+    name: "Bow Sleeve (Navy Blue)",
+    desc: "A sophisticated navy blue sleeve with a bow detail.",
+    price: "SGD 5.90",
+    tag: "Premium",
+    emoji: "✨",
+    collab: null,
+  },
+  {
+    id: "acc-7",
+    name: "PopMart Miffy × Youthentic Sleeve",
     desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
     price: "SGD 9.90",
     tag: "Limited Edition",
@@ -62,16 +89,26 @@ const ACCESSORIES = [
     collab: "PopMart",
   },
   {
-    id: "acc-5",
-    name: "PopMart × Youthentic Bundle",
-    desc: "Your choice of 10ml scent + exclusive PopMart sleeve. Ships together.",
-    price: "From SGD 24.90",
-    tag: "Bundle Deal",
-    emoji: "🎁",
+    id: "acc-8",
+    name: "PopMart Butterbear × Youthentic Sleeve",
+    desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
+    price: "SGD 9.90",
+    tag: "Limited Edition",
+    emoji: "🎨",
     collab: "PopMart",
   },
   {
-    id: "acc-6",
+    id: "acc-9",
+    name: "PopMart Twinkle × Youthentic Sleeve",
+    desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
+    price: "SGD 9.90",
+    tag: "Limited Edition",
+    emoji: "🎨",
+    collab: "PopMart",
+  },
+
+  {
+    id: "acc-7",
     name: "Custom Engraving",
     desc: "Add a personal message or name to any sleeve. Perfect for gifting.",
     price: "SGD 8.90",
@@ -83,17 +120,17 @@ const ACCESSORIES = [
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400;500&display=swap');
-
+ 
   :root {
     --black: #000000; --dark: #0a0a0a; --panel: #111111;
     --gold: #C9A84C; --gold2: #E2B84A; --yellow: #D4C028;
     --white: #FFFFFF; --muted: #888888; --border: rgba(201,168,76,0.2);
     --green: #6dbf82; --red: #e05a4a; --blue: #4a9de0;
   }
-
+ 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--black); color: var(--white); font-family: 'Jost', sans-serif; overflow-x: hidden; }
-
+ 
   /* ── HERO ───────────────────────────────────────────────────────── */
   .pr-hero {
     position: relative; padding: 10rem 3rem 5rem;
@@ -145,7 +182,7 @@ const css = `
   }
   .pr-hero__badge--drop { border-color: rgba(74,157,224,0.4); color: var(--blue); background: rgba(74,157,224,0.04); }
   .pr-hero__badge--drop .pr-hero__badge-dot { background: var(--blue); }
-
+ 
   /* ── TOOLBAR ────────────────────────────────────────────────────── */
   .pr-toolbar {
     position: sticky; top: 0; z-index: 50;
@@ -189,7 +226,7 @@ const css = `
   .pr-sort option { background: var(--dark); }
   .pr-count { font-size: 0.72rem; letter-spacing: 0.08em; color: var(--muted); margin-left: auto; white-space: nowrap; }
   .pr-count span { color: var(--gold); }
-
+ 
   /* ── GRID ───────────────────────────────────────────────────────── */
   .pr-body { background: var(--black); padding: 4rem 3rem 2rem; }
   .pr-section-label {
@@ -224,7 +261,7 @@ const css = `
   }
   /* when both exclusive + drop, stack the tags */
   .pr-drop-tag--offset { top: 1.5rem; }
-
+ 
   /* ── SHIPPING INFO STRIP ────────────────────────────────────────── */
   .pr-shipping {
     margin: 3rem 3rem 0;
@@ -241,7 +278,7 @@ const css = `
   .pr-shipping__label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
   .pr-shipping__val { font-size: 0.88rem; color: var(--white); font-weight: 500; line-height: 1.3; }
   .pr-shipping__sub { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
-
+ 
   /* ── ACCESSORIES SECTION ────────────────────────────────────────── */
   .pr-acc {
     padding: 5rem 3rem 6rem; border-top: 1px solid var(--border);
@@ -258,7 +295,7 @@ const css = `
     font-size: 1rem; font-weight: 300; font-style: italic;
     color: var(--muted); max-width: 52ch; line-height: 1.8;
   }
-
+ 
   /* horizontal scroll row */
   .pr-acc__scroll-wrap { position: relative; }
   .pr-acc__scroll {
@@ -269,20 +306,27 @@ const css = `
   .pr-acc__scroll::-webkit-scrollbar { height: 3px; }
   .pr-acc__scroll::-webkit-scrollbar-track { background: transparent; }
   .pr-acc__scroll::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); }
-
+ 
   .pr-acc-card {
     background: var(--dark); min-width: 260px; max-width: 260px;
     display: flex; flex-direction: column;
     transition: background 0.25s; flex-shrink: 0;
   }
   .pr-acc-card:hover { background: var(--panel); }
-
+ 
   .pr-acc-card__img {
     width: 100%; aspect-ratio: 3/4; background: #0d0d0d;
     display: flex; align-items: center; justify-content: center;
     position: relative; overflow: hidden; flex-shrink: 0;
     border-bottom: 1px solid rgba(201,168,76,0.08);
   }
+  .pr-acc-card__actual-img {
+    width: 100%; height: 100%; object-fit: cover; object-position: center;
+    transition: transform 0.5s ease, filter 0.3s ease;
+    filter: brightness(0.88);
+  }
+  .pr-acc-card:hover .pr-acc-card__actual-img { transform: scale(1.04); filter: brightness(1); }
+ 
   .pr-acc-card__placeholder {
     display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
     opacity: 0.2;
@@ -291,7 +335,7 @@ const css = `
   .pr-acc-card__placeholder-text {
     font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
   }
-
+ 
   /* collab badge */
   .pr-acc-card__collab {
     position: absolute; bottom: 0.75rem; left: 0.75rem;
@@ -307,7 +351,7 @@ const css = `
     clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%);
   }
   .pr-acc-card__tag--collab { background: var(--blue); color: var(--white); }
-
+ 
   .pr-acc-card__body {
     padding: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; flex: 1;
   }
@@ -327,17 +371,21 @@ const css = `
   .pr-acc-card__cta {
     font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--muted); border: 1px solid rgba(201,168,76,0.2); padding: 0.3rem 0.7rem;
-    cursor: pointer; background: transparent; transition: color 0.2s, border-color 0.2s;
-    font-family: 'Jost', sans-serif;
+    cursor: pointer; background: transparent; transition: color 0.2s, border-color 0.2s, background 0.2s;
+    font-family: 'Jost', sans-serif; white-space: nowrap;
   }
-  .pr-acc-card__cta:hover { color: var(--gold); border-color: var(--gold); }
-
+  .pr-acc-card__cta:hover:not(.added) { color: var(--gold); border-color: var(--gold); }
+  .pr-acc-card__cta.added {
+    background: rgba(109,191,130,0.1); color: var(--green);
+    border-color: rgba(109,191,130,0.4); cursor: default; pointer-events: none;
+  }
+ 
   .pr-acc__note {
     margin-top: 1.5rem; font-size: 0.72rem; color: var(--muted);
     display: flex; align-items: center; gap: 0.5rem;
   }
   .pr-acc__note::before { content: '✦'; color: var(--gold); font-size: 0.55rem; }
-
+ 
   /* ── STATES ─────────────────────────────────────────────────────── */
   .pr-state {
     background: var(--black); grid-column: 1 / -1;
@@ -362,13 +410,13 @@ const css = `
   }
   .pr-skeleton__line--title { width: 65%; height: 1.1rem; }
   .pr-skeleton__line--sm    { width: 45%; }
-
+ 
   /* ── KEYFRAMES ──────────────────────────────────────────────────── */
   @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
   @keyframes fadeUp  { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
   @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
   @keyframes pulse   { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
+ 
   /* ── RESPONSIVE ─────────────────────────────────────────────────── */
   @media (max-width: 900px) {
     .pr-shipping { grid-template-columns: repeat(2, 1fr); margin: 2rem 1.5rem 0; }
@@ -386,7 +434,95 @@ const css = `
     .pr-shipping { grid-template-columns: 1fr; }
   }
 `;
-
+ 
+/* ─── ACCESSORY IMAGE LOADER ────────────────────────────────────────
+   Uses the same require() pattern as ProductCard.
+   Falls back to emoji placeholder if image not found.
+─────────────────────────────────────────────────────────────────────── */
+const getAccImage = (name) => {
+  try { return require(`../assets/${name}.png`); }
+  catch { return null; }
+};
+ 
+const AccImage = ({ name, emoji }) => {
+  const [err, setErr] = React.useState(false);
+  const src = getAccImage(name);
+  if (src && !err) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        className="pr-acc-card__actual-img"
+        onError={() => setErr(true)}
+      />
+    );
+  }
+  return (
+    <div className="pr-acc-card__placeholder">
+      <span className="pr-acc-card__placeholder-icon">{emoji}</span>
+      <span className="pr-acc-card__placeholder-text">Image Coming Soon</span>
+    </div>
+  );
+};
+ 
+ 
+/* ─── ACCESSORY CARD ─────────────────────────────────────────────────
+   Wraps each accessory card with its own "added" feedback state.
+   Calls addToCart from CartContext directly.
+─────────────────────────────────────────────────────────────────────── */
+const AccCard = ({ acc, addToCart }) => {
+  const [added, setAdded] = useState(false);
+ 
+  const handleAdd = useCallback(() => {
+    if (added) return;
+    // Build a cart-compatible item from the accessory data
+    // Using a negative/string id so it never collides with product ids
+    addToCart(
+      {
+        id:          acc.id,
+        name:        acc.name,
+        price:       parseFloat(acc.price.replace("SGD ", "").replace("From SGD ", "")),
+        description: acc.desc,
+        collection:  acc.collab ?? "Accessories",
+        stock:       99,
+        variant_type: "accessory",
+      },
+      "accessory"
+    );
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  }, [acc, added, addToCart]);
+ 
+  return (
+    <div className="pr-acc-card">
+      <div className="pr-acc-card__img">
+        <AccImage name={acc.name} emoji={acc.emoji} />
+        {acc.tag && (
+          <span className={`pr-acc-card__tag${acc.collab ? " pr-acc-card__tag--collab" : ""}`}>
+            {acc.tag}
+          </span>
+        )}
+        {acc.collab && (
+          <span className="pr-acc-card__collab">× {acc.collab}</span>
+        )}
+      </div>
+      <div className="pr-acc-card__body">
+        <p className="pr-acc-card__name">{acc.name}</p>
+        <p className="pr-acc-card__desc">{acc.desc}</p>
+        <div className="pr-acc-card__footer">
+          <span className="pr-acc-card__price">{acc.price}</span>
+          <button
+            className={`pr-acc-card__cta${added ? " added" : ""}`}
+            onClick={handleAdd}
+          >
+            {added ? "✓ Added" : "Add On →"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+ 
 const SkeletonCard = () => (
   <div className="pr-skeleton">
     <div className="pr-skeleton__img" />
@@ -397,8 +533,9 @@ const SkeletonCard = () => (
     </div>
   </div>
 );
-
+ 
 const Products = () => {
+  const { addToCart } = useCart();
   const [products,      setProducts]      = useState([]);
   const [loading,       setLoading]       = useState(true);
   const [error,         setError]         = useState(null);
@@ -407,19 +544,19 @@ const Products = () => {
   const [sort,          setSort]          = useState("default");
   const [showExclusive, setShowExclusive] = useState(false);
   const [showDrop,      setShowDrop]      = useState(false);
-
+ 
   useEffect(() => {
     setLoading(true);
     API.get("/products")
       .then((res) => { setProducts(res.data); setLoading(false); })
       .catch((err) => { console.error(err); setError("Couldn't load products. Please try again."); setLoading(false); });
   }, []);
-
+ 
   const categories = useMemo(() => {
     const cats = [...new Set(products.map((p) => p.category).filter(Boolean))];
     return ["All", ...cats];
   }, [products]);
-
+ 
   const displayed = useMemo(() => {
     let list = [...products];
     if (showExclusive) list = list.filter((p) => EXCLUSIVE_PRODUCTS.includes(p.name));
@@ -445,14 +582,14 @@ const Products = () => {
     }
     return list;
   }, [products, search, category, sort, showExclusive, showDrop]);
-
+ 
   const exclusiveCount = products.filter((p) => EXCLUSIVE_PRODUCTS.includes(p.name)).length;
   const dropCount      = products.filter((p) => WEEKEND_DROP_PRODUCTS.includes(p.name)).length;
-
+ 
   return (
     <>
       <style>{css}</style>
-
+ 
       {/* HERO */}
       <section className="pr-hero">
         <div className="pr-hero__wordmark" aria-hidden="true"><span>COLLECTION</span></div>
@@ -474,7 +611,7 @@ const Products = () => {
           </div>
         </div>
       </section>
-
+ 
       {/* TOOLBAR */}
       <div className="pr-toolbar">
         <div className="pr-search">
@@ -510,7 +647,7 @@ const Products = () => {
           </div>
         )}
       </div>
-
+ 
       {/* GRID */}
       <main className="pr-body">
         {loading && (
@@ -574,7 +711,7 @@ const Products = () => {
           </>
         )}
       </main>
-
+ 
       {/* SHIPPING INFO STRIP */}
       <div className="pr-shipping">
         {[
@@ -591,7 +728,7 @@ const Products = () => {
           </div>
         ))}
       </div>
-
+ 
       {/* ACCESSORIES SECTION */}
       <section className="pr-acc">
         <div className="pr-acc__header">
@@ -602,46 +739,23 @@ const Products = () => {
             from minimal matte to limited-edition collaborations.
           </p>
         </div>
-
+ 
         <div className="pr-acc__scroll-wrap">
           <div className="pr-acc__scroll">
             {ACCESSORIES.map((acc) => (
-              <div key={acc.id} className="pr-acc-card">
-                <div className="pr-acc-card__img">
-                  <div className="pr-acc-card__placeholder">
-                    <span className="pr-acc-card__placeholder-icon">{acc.emoji}</span>
-                    <span className="pr-acc-card__placeholder-text">Image Coming Soon</span>
-                  </div>
-                  {acc.tag && (
-                    <span className={`pr-acc-card__tag${acc.collab ? " pr-acc-card__tag--collab" : ""}`}>
-                      {acc.tag}
-                    </span>
-                  )}
-                  {acc.collab && (
-                    <span className="pr-acc-card__collab">× {acc.collab}</span>
-                  )}
-                </div>
-                <div className="pr-acc-card__body">
-                  <p className="pr-acc-card__name">{acc.name}</p>
-                  <p className="pr-acc-card__desc">{acc.desc}</p>
-                  <div className="pr-acc-card__footer">
-                    
-                    <button className="pr-acc-card__cta">Add On →</button>
-                  </div>
-                </div>
-              </div>
+              <AccCard key={acc.id} acc={acc} addToCart={addToCart} />
             ))}
           </div>
         </div>
-
+ 
         <p className="pr-acc__note">
           Accessories ship with your fragrance order at no extra delivery cost.
         </p>
       </section>
-
+ 
       <Footer />
     </>
   );
 };
-
+ 
 export default Products;

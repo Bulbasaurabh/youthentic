@@ -143,9 +143,23 @@ const Login = () => {
     setError("");
 
     try {
-      const res = await API.get(`/orders?email=${encodeURIComponent(trimmed)}`);
-      // pass orders + email through navigation state
-      navigate("/orders", { state: { orders: res.data, email: trimmed } });
+      // fetch orders and user profile in parallel
+      const [ordersRes, userRes] = await Promise.allSettled([
+        API.get(`/orders?email=${encodeURIComponent(trimmed)}`),
+        API.get(`/users/loyalty?email=${encodeURIComponent(trimmed)}`),
+      ]);
+
+      const orders    = ordersRes.status === "fulfilled" ? ordersRes.value.data : [];
+      const userData  = userRes.status  === "fulfilled" ? userRes.value.data   : {};
+
+      navigate("/orders", {
+        state: {
+          orders,
+          email:     trimmed,
+          createdAt: userData.created_at ?? null,
+          tier:      userData.tier       ?? "Bronze",
+        },
+      });
     } catch (e) {
       console.error(e);
       setError("Couldn't find orders for that email. Please check and try again.");

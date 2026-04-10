@@ -18,7 +18,6 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 # Allow both local dev and production frontend
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://youthentic-sg.netlify.app",
     FRONTEND_URL,
 ]
 
@@ -84,7 +83,7 @@ async def create_user(user: dict):
 # FIX 2: Add loyalty fetch endpoint (used by LoyaltyContext.fetchLoyalty)
 @app.get("/users/loyalty")
 def get_loyalty(email: str):
-    user = supabase.table("users").select("loyalty_points, tier").eq("email", email).execute()
+    user = supabase.table("users").select("loyalty_points, tier, created_at").eq("email", email).execute()
     if not user.data:
         raise HTTPException(status_code=404, detail="User not found")
     return user.data[0]
@@ -272,6 +271,33 @@ async def stripe_webhook(request: Request):
 
 
 # -----------------------------
+# USER ORDERS
+# -----------------------------
+@app.get("/orders")
+def get_user_orders(email: str):
+    response = (
+        supabase
+        .table("orders")
+        .select("*")
+        .eq("email", email)
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    orders = response.data or []
+
+    # Ensure `items` is always an array for frontend rendering.
+    for order in orders:
+        if isinstance(order.get("items"), str):
+            try:
+                order["items"] = json.loads(order["items"])
+            except Exception:
+                order["items"] = []
+
+    return orders
+
+
+# -----------------------------
 # ADMIN ORDERS
 # -----------------------------
 @app.get("/admin/orders")
@@ -295,17 +321,3 @@ async def update_order(order_id: str, data: dict):
         raise HTTPException(status_code=404, detail="Order not found")
 
     return response.data[0]
-
-
-# Add this route to main.py
-
-@app.get("/orders")
-def get_orders_by_email(email: str):
-    if not email:
-        raise HTTPException(status_code=400, detail="Email is required")
-    response = supabase.table("orders") \
-        .select("*") \
-        .eq("email", email.lower().strip()) \
-        .order("created_at", desc=True) \
-        .execute()
-    return response.data

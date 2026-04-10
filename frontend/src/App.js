@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {useEffect} from "react";
 import Navbar from "./components/Navbar";
 import Popups from "./components/Popups";
 
@@ -20,7 +21,23 @@ import { LoyaltyProvider } from "./context/LoyaltyContext";
 
 import "./App.css";
 
+
 function App() {
+  const warmBackend = async () => {
+  const url = `${process.env.REACT_APP_API_URL}/`;
+  for (let i = 0; i < 3; i++) {
+    try {
+      await fetch(url);
+      return; // success
+    } catch {
+      await new Promise((r) => setTimeout(r, 3000)); // wait 3s then retry
+    }
+  }
+};
+
+useEffect(() => {
+  warmBackend();
+}, []);
   return (
     <LoyaltyProvider>
       <CartProvider>

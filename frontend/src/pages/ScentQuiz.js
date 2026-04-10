@@ -355,7 +355,7 @@ const SCENTS = [
     tags: ["woody", "musky", "bold", "evening"],
   },
   {
-    name: "Evening",
+    name: "Noche",
     notes: "Oud · Dark Rose · Black Pepper",
     tags: ["bold", "floral", "musky", "evening"],
   },
