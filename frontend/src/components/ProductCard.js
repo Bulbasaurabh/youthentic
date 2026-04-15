@@ -2,10 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useCart } from "../context/CartContext";
 
 /* ─── IMAGE LOADER ─────────────────────────────────────────────── */
-const getImage = (name) => {
-  try { return require(`../assets/${name}.png`); }
-  catch { return null; }
-};
+const getImage = (name) => `/assets/${name}.png`
+
+const buildBundleSignature = (scents = []) => scents.slice().sort((a, b) => a.localeCompare(b)).join("|");
 
 /* ─── FAKE REVIEWS ──────────────────────────────────────────────
    Keyed by product name — falls back to generic pool if no match.
@@ -270,13 +269,56 @@ const css = `
   .yt-modal__meta-chip span:first-child { font-size: 0.8rem; }
 
   /* bundle */
-  .yt-modal__bundle { display: flex; flex-direction: column; gap: 0; }
-  .yt-modal__bundle-title { font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: #C9A84C; margin-bottom: 0.5rem; }
+  .yt-modal__bundle {
+    display: flex; flex-direction: column; gap: 0.75rem;
+    border-top: 1px solid rgba(201,168,76,0.1); padding-top: 1.1rem;
+  }
+  .yt-modal__bundle-title { font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: #C9A84C; margin-bottom: 0.15rem; }
   .yt-modal__bundle-item { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid rgba(201,168,76,0.08); }
   .yt-modal__bundle-item:last-child { border-bottom: none; }
   .yt-modal__bundle-dot { width: 6px; height: 6px; border-radius: 50%; background: #C9A84C; flex-shrink: 0; }
   .yt-modal__bundle-name { font-size: 0.84rem; color: #fff; flex: 1; }
   .yt-modal__bundle-vol { font-size: 0.7rem; letter-spacing: 0.1em; color: #666; text-transform: uppercase; }
+  .yt-modal__bundle-helper {
+    font-size: 0.72rem; color: #999; line-height: 1.6;
+    background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.15);
+    padding: 0.55rem 0.7rem;
+  }
+  .yt-modal__bundle-grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+  .yt-modal__bundle-choice {
+    border: 1px solid rgba(201,168,76,0.18); background: rgba(255,255,255,0.01);
+    padding: 0.72rem 0.78rem; text-align: left; cursor: pointer;
+    display: flex; flex-direction: column; gap: 0.2rem;
+    min-height: 4.15rem;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+  .yt-modal__bundle-choice:hover {
+    border-color: rgba(201,168,76,0.55); transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  }
+  .yt-modal__bundle-choice.selected {
+    border-color: #C9A84C; background: rgba(201,168,76,0.12);
+    box-shadow: inset 0 0 0 1px rgba(201,168,76,0.25);
+  }
+  .yt-modal__bundle-choice:disabled {
+    opacity: 0.45; cursor: not-allowed; transform: none;
+  }
+  .yt-modal__bundle-choice-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.92rem; color: #fff; line-height: 1.35;
+  }
+  .yt-modal__bundle-choice-vol {
+    font-size: 0.6rem; letter-spacing: 0.16em; color: #8f8f8f; text-transform: uppercase;
+  }
+  .yt-modal__bundle-choice-state {
+    margin-top: auto;
+    font-size: 0.58rem; letter-spacing: 0.13em; text-transform: uppercase;
+    color: #6f6f6f;
+  }
+  .yt-modal__bundle-choice.selected .yt-modal__bundle-choice-state { color: #C9A84C; }
 
   /* variant toggle */
   .yt-modal__variant-section { display: flex; flex-direction: column; gap: 0.75rem; }
@@ -357,20 +399,31 @@ const css = `
     .yt-modal__panel { padding: 1.5rem; }
     .yt-modal__variant-toggle { align-self: stretch; }
     .yt-modal__variant-btn { flex: 1; }
+    .yt-modal__bundle-grid { grid-template-columns: 1fr; }
   }
 `;
 
 /* ─── PRODUCT MODAL ─────────────────────────────────────────────── */
-const ProductModal = ({ product, onClose }) => {
+const ProductModal = ({ product, onClose, availableScents = [] }) => {
   const { addToCart } = useCart();
   const [variant, setVariant] = useState("10ml");
   const [added,   setAdded]   = useState(false);
   const [imgErr,  setImgErr]  = useState(false);
+  const [bundleSelections, setBundleSelections] = useState([]);
+  const [bundleError, setBundleError] = useState("");
 
   const isBundle     = product.variant_type === "bundle";
   const has50ml      = product.price_50ml != null;
   const isOutOfStock = product.stock === 0;
   const currentPrice = variant === "50ml" && has50ml ? product.price_50ml : product.price;
+  const requiredBundleCount = isBundle
+    ? Math.max(
+        1,
+        Array.isArray(product.bundle_items) && product.bundle_items.length > 0
+          ? product.bundle_items.reduce((sum, item) => sum + (Number(item?.quantity) || 1), 0)
+          : 3
+      )
+    : 0;
 
   const reviews    = getReviews(product.name);
   const ratingAvg  = avgRating(reviews);
@@ -390,9 +443,38 @@ const ProductModal = ({ product, onClose }) => {
 
   const handleAdd = () => {
     if (added || isOutOfStock) return;
-    addToCart(product, isBundle ? "bundle" : variant);
+
+    if (isBundle) {
+      if (bundleSelections.length !== requiredBundleCount) {
+        setBundleError(`Select ${requiredBundleCount} scents to build this bundle.`);
+        return;
+      }
+
+      const signature = buildBundleSignature(bundleSelections);
+      addToCart(product, "bundle", {
+        bundleSelections,
+        customKeySuffix: signature,
+      });
+      setBundleError("");
+    } else {
+      addToCart(product, variant);
+    }
+
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const toggleBundleSelection = (scentName) => {
+    setBundleError("");
+    setBundleSelections((prev) => {
+      if (prev.includes(scentName)) {
+        return prev.filter((name) => name !== scentName);
+      }
+      if (prev.length >= requiredBundleCount) {
+        return prev;
+      }
+      return [...prev, scentName];
+    });
   };
 
   const imgSrc = getImage(product.name);
@@ -468,19 +550,33 @@ const ProductModal = ({ product, onClose }) => {
             </div>
           )}
 
-          {/* BUNDLE CONTENTS */}
-          {isBundle && product.bundle_items?.length > 0 && (
+          {/* BUNDLE BUILDER */}
+          {isBundle && (
             <div className="yt-modal__bundle">
-              <p className="yt-modal__bundle-title">Bundle Contents</p>
-              {product.bundle_items.map((item, i) => (
-                <div key={i} className="yt-modal__bundle-item">
-                  <div className="yt-modal__bundle-dot" />
-                  <span className="yt-modal__bundle-name">
-                    {item.quantity > 1 ? `${item.quantity}× ` : ""}{item.name}
-                  </span>
-                  <span className="yt-modal__bundle-vol">{item.volume_ml}ml</span>
-                </div>
-              ))}
+              <p className="yt-modal__bundle-title">Build Your Bundle</p>
+              <p className="yt-modal__bundle-helper">
+                Choose {requiredBundleCount} scents ({bundleSelections.length}/{requiredBundleCount} selected)
+              </p>
+              <div className="yt-modal__bundle-grid">
+                {availableScents.map((scent) => {
+                  const selected = bundleSelections.includes(scent.name);
+                  const locked = !selected && bundleSelections.length >= requiredBundleCount;
+                  return (
+                    <button
+                      key={scent.id ?? scent.name}
+                      type="button"
+                      className={`yt-modal__bundle-choice${selected ? " selected" : ""}`}
+                      onClick={() => toggleBundleSelection(scent.name)}
+                      disabled={locked}
+                    >
+                      <span className="yt-modal__bundle-choice-name">{scent.name}</span>
+                      <span className="yt-modal__bundle-choice-vol">10ml</span>
+                      
+                    </button>
+                  );
+                })}
+              </div>
+              {bundleError && <p className="yt-modal__stock-warn">{bundleError}</p>}
             </div>
           )}
 
@@ -576,7 +672,7 @@ const ProductModal = ({ product, onClose }) => {
 };
 
 /* ─── PRODUCT CARD ──────────────────────────────────────────────── */
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, allProducts = [] }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [imgError,  setImgError]  = useState(false);
   const openModal  = useCallback(() => setModalOpen(true),  []);
@@ -591,6 +687,11 @@ const ProductCard = ({ product }) => {
   const imgSrc       = getImage(product.name);
   const reviews      = getReviews(product.name);
   const ratingAvg    = avgRating(reviews);
+  const availableScents = allProducts.filter((p) =>
+    p?.id !== product.id &&
+    p?.variant_type !== "bundle" &&
+    (p?.top_notes?.length || p?.middle_notes?.length || p?.base_notes?.length)
+  );
 
   return (
     <>
@@ -668,7 +769,7 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      {modalOpen && <ProductModal product={product} onClose={closeModal} />}
+      {modalOpen && <ProductModal product={product} onClose={closeModal} availableScents={availableScents} />}
     </>
   );
 };

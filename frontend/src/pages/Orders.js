@@ -50,7 +50,13 @@ const css = `
     font-size: clamp(2.5rem, 6vw, 5.5rem); letter-spacing: 0.04em; color: var(--white); line-height: 0.95;
   }
   .ord-hero__title span { color: var(--gold); }
-  .ord-hero__email { font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem; }
+  .ord-hero__email {
+    font-size: 0.82rem; color: rgba(255,255,255,0.9); margin-top: 0.5rem;
+    display: inline-block; padding: 0.55rem 0.85rem;
+    background: rgba(0,0,0,0.42);
+    border: 1px solid rgba(201,168,76,0.2);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
+  }
   .ord-hero__email strong { color: var(--white); }
 
   /* body */
@@ -273,7 +279,14 @@ const OrderCard = ({ order }) => {
         <div className="ord-card__items">
           {items.map((item, i) => (
             <div key={i} className="ord-item">
-              <span className="ord-item__name">{item.name ?? "Unknown"}</span>
+              <span className="ord-item__name">
+                {item.name ?? "Unknown"}
+                {Array.isArray(item.bundleSelections) && item.bundleSelections.length > 0 && (
+                  <span style={{ display: "block", color: "#888", fontSize: "0.7rem", marginTop: "0.2rem" }}>
+                    {`Bundle: ${item.bundleSelections.join(", ")}`}
+                  </span>
+                )}
+              </span>
               {item.variant && <span className="ord-item__variant">{item.variant}</span>}
               <span className="ord-item__qty">×{item.quantity ?? 1}</span>
               <span className="ord-item__price">{fmt((item.price ?? 0) * (item.quantity ?? 1))}</span>

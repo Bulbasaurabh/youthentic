@@ -234,8 +234,13 @@ const css = `
     font-size: 0.75rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255,255,255,0.9);
     line-height: 1.8;
+    display: inline-block;
+    padding: 0.65rem 0.9rem;
+    background: rgba(0,0,0,0.42);
+    border: 1px solid rgba(201,168,76,0.2);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
   }
   .yt-hero__tagline strong {
     display: block;
@@ -870,13 +875,13 @@ const SCENTS = [
 ];
 
 const MARQUEE_ITEMS = [
-  "CRAFTED IN INDONESIA",
+  "FORMULATED IN BARCELONA",
   "REFINED FOR SINGAPORE",
   "YOUTHENTIC LITE",
   "LONG-LASTING FORMULA",
   "POCKET-SIZED LUXURY",
   "FREE SG DELIVERY",
-  "CRAFTED IN INDONESIA",
+  "FORMULATED IN BARCELONA",
   "REFINED FOR SINGAPORE",
   "YOUTHENTIC LITE",
   "LONG-LASTING FORMULA",

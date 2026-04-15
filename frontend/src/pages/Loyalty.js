@@ -713,7 +713,7 @@ const Loyalty = () => {
                 icon: TIER_ICONS.Gold, tier: "Gold", color: "#C9A84C",
                 req: "500 Points", period: "Every 2 years",
                 desc: "Accumulate 500 points within your 2-year window to maintain Gold status and full benefits.",
-                fail: "Drops to Silver · Points adjusted to 120",
+                fail: "Drops to Bronze · All points reset to 0",
               },
             ].map((r) => (
               <div key={r.tier} className="ly-renewal__rule">

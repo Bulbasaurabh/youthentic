@@ -71,9 +71,12 @@ const css = `
   }
   .cart-hero__title span { color: var(--gold); }
   .cart-hero__meta {
-    font-size: 0.78rem; color: var(--muted); letter-spacing: 0.06em;
+    font-size: 0.78rem; color: rgba(255,255,255,0.9); letter-spacing: 0.06em;
     animation: fadeUp 0.8s ease forwards 0.45s; opacity: 0;
-    align-self: flex-end; padding-bottom: 0.4rem;
+    align-self: flex-end; padding: 0.55rem 0.85rem;
+    background: rgba(0,0,0,0.42);
+    border: 1px solid rgba(201,168,76,0.2);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
   }
   .cart-hero__meta span { color: var(--white); }
 
@@ -287,6 +290,33 @@ const css = `
     font-size: 0.68rem; color: var(--muted); letter-spacing: 0.06em;
   }
 
+  .cart-gifts {
+    background: var(--panel);
+    border: 1px solid rgba(201,168,76,0.16);
+    padding: 1rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .cart-gifts__title {
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .cart-gifts__item {
+    font-size: 0.74rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .cart-gifts__item strong { color: var(--white); font-weight: 500; }
+  .cart-gifts__note {
+    font-size: 0.66rem;
+    color: #666;
+    line-height: 1.45;
+    margin-top: 0.15rem;
+  }
+
   /* ── EMPTY STATE ────────────────────────────────────────────────── */
   .cart-empty {
     flex: 1; display: flex; flex-direction: column;
@@ -352,21 +382,27 @@ const css = `
 `;
 
 /* ── IMAGE LOADER (same pattern as ProductCard) ─────────────────── */
-const getImage = (name) => {
-  try {
-    return require(`../assets/${name}.png`);
-  } catch {
-    return null;
-  }
-};
+const getImage = (name) => `/assets/${name}.png`;
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, finalTotal } = useCart();
 
+  let memberProfile = null;
+  try {
+    memberProfile = JSON.parse(localStorage.getItem("yt_member_profile") || "null");
+  } catch {
+    memberProfile = null;
+  }
+  const isMember = Boolean(memberProfile?.isMember);
+
   const subtotal   = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const freeShipping = subtotal >= 50;          // free over SGD 50
-  const shipping   = freeShipping ? 0 : 3.50;  // SGD 3.50 flat
+  const shipping   = freeShipping ? 0 : 5.00;  // SGD 5.00 flat
   const loyaltyPts = Math.floor(subtotal);       // 1 pt per SGD spent
+  const total10mlQty = cart.reduce((sum, item) => sum + ((item.variant === "10ml") ? item.quantity : 0), 0);
+  const total50mlQty = cart.reduce((sum, item) => sum + ((item.variant === "50ml") ? item.quantity : 0), 0);
+  const freeSleeveQty = total10mlQty;
+  const freeTesterQty = isMember ? total50mlQty : 0;
 
   const fmt = (val) => `SGD ${Number(val).toFixed(2)}`;
 
@@ -460,6 +496,9 @@ const Cart = () => {
                       <span className="cart-item__category">{item.category}</span>
                     )}
                     <span className="cart-item__name">{item.name}</span>
+                    {Array.isArray(item.bundleSelections) && item.bundleSelections.length > 0 && (
+                      <span className="cart-item__category">Bundle: {item.bundleSelections.join(", ")}</span>
+                    )}
                     <span className="cart-item__unit">
                     {fmt(item.price)} each
                     {item.variant && item.variant !== "bundle" && (
@@ -542,6 +581,28 @@ const Cart = () => {
                 {fmt((finalTotal ?? subtotal) + shipping)}
               </span>
             </div>
+
+            {(freeSleeveQty > 0 || freeTesterQty > 0 || total50mlQty > 0) && (
+              <div className="cart-gifts">
+                <p className="cart-gifts__title">Free Gifts</p>
+                {freeSleeveQty > 0 && (
+                  <p className="cart-gifts__item">
+                    <strong>{freeSleeveQty}× free Plain Sleeve</strong> for 10ml purchases
+                    {" "}(randomly Midnight Black or Pearl White)
+                  </p>
+                )}
+                {freeTesterQty > 0 && (
+                  <p className="cart-gifts__item">
+                    <strong>{freeTesterQty}× free 1.5ml tester</strong> for 50ml purchases (member benefit)
+                  </p>
+                )}
+                {total50mlQty > 0 && !isMember && (
+                  <p className="cart-gifts__note">
+                    Login as a member to unlock free 1.5ml testers on 50ml purchases.
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* loyalty preview */}
             <div className="cart-loyalty">

@@ -73,8 +73,12 @@ const css = `
   .sq-hero__sub {
     position: relative; z-index: 1;
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(1rem, 1.5vw, 1.15rem); font-weight: 300; font-style: italic;
-    color: var(--muted); max-width: 44ch; line-height: 1.8;
+    font-size: clamp(1rem, 1.5vw, 1.15rem); font-weight: 400; font-style: italic;
+    color: rgba(255,255,255,0.9); max-width: 52ch; line-height: 1.85;
+    padding: 0.8rem 1.1rem;
+    background: rgba(0,0,0,0.42);
+    border: 1px solid rgba(201,168,76,0.2);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
   }
 
   /* ── PROGRESS BAR ───────────────────────────────────────────────── */

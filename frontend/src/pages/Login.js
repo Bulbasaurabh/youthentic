@@ -151,6 +151,18 @@ const Login = () => {
 
       const orders    = ordersRes.status === "fulfilled" ? ordersRes.value.data : [];
       const userData  = userRes.status  === "fulfilled" ? userRes.value.data   : {};
+      const isMember  = userRes.status === "fulfilled";
+
+      if (isMember) {
+        localStorage.setItem("yt_member_profile", JSON.stringify({
+          email: trimmed,
+          tier: userData.tier ?? "Bronze",
+          isMember: true,
+          updatedAt: Date.now(),
+        }));
+      } else {
+        localStorage.removeItem("yt_member_profile");
+      }
 
       navigate("/orders", {
         state: {
@@ -198,6 +210,7 @@ const Login = () => {
             <div className="lg-form-wrap">
               <div>
                 <h2 className="lg-form-title">TRACK ORDER</h2>
+                <br />
                 <p className="lg-form-sub">Enter your email address to view your orders.</p>
               </div>
 

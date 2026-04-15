@@ -12,8 +12,10 @@ export const CartProvider = ({ children }) => {
   // ── ADD ──────────────────────────────────────────────────────────
   // cartKey = product.id + "_" + variant (e.g. "abc123_10ml")
   // so same scent in different sizes = separate line items
-  const addToCart = (product, variant = "10ml") => {
-    const cartKey = `${product.id}_${variant}`;
+  const addToCart = (product, variant = "10ml", options = {}) => {
+    const customKeySuffix = options.customKeySuffix ? `_${options.customKeySuffix}` : "";
+    const cartKey = `${product.id}_${variant}${customKeySuffix}`;
+    const quantityToAdd = Math.max(1, Number(options.quantity) || 1);
     const priceForVariant =
       variant === "50ml" && product.price_50ml != null
         ? product.price_50ml
@@ -23,7 +25,7 @@ export const CartProvider = ({ children }) => {
       const existing = prev.find((p) => p.cartKey === cartKey);
       if (existing) {
         return prev.map((p) =>
-          p.cartKey === cartKey ? { ...p, quantity: p.quantity + 1 } : p
+          p.cartKey === cartKey ? { ...p, quantity: p.quantity + quantityToAdd } : p
         );
       }
       return [
@@ -33,7 +35,8 @@ export const CartProvider = ({ children }) => {
           cartKey,
           variant,                      // "10ml" | "50ml" | "bundle"
           price: priceForVariant,       // use variant-specific price
-          quantity: 1,
+          bundleSelections: options.bundleSelections ?? undefined,
+          quantity: quantityToAdd,
         },
       ];
     });

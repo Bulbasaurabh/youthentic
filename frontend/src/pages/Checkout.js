@@ -226,6 +226,28 @@ const css = `
   .co-loyalty__text { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
   .co-loyalty__text strong { color: var(--gold); display: block; font-size: 0.8rem; }
 
+  .co-gifts {
+    background: var(--panel);
+    border: 1px solid rgba(201,168,76,0.16);
+    padding: 0.95rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .co-gifts__title {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .co-gifts__item {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .co-gifts__item strong { color: var(--white); }
+  .co-gifts__note { font-size: 0.65rem; color: #666; line-height: 1.5; }
+
   /* pay button */
   .co-pay-btn {
     display: flex; align-items: center; justify-content: center; gap: 0.75rem;
@@ -339,10 +361,22 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState(null);
 
+  let memberProfile = null;
+  try {
+    memberProfile = JSON.parse(localStorage.getItem("yt_member_profile") || "null");
+  } catch {
+    memberProfile = null;
+  }
+  const isMember = Boolean(memberProfile?.isMember);
+
   const subtotal     = cart.reduce((s, i) => s + i.price * i.quantity, 0);
   const shippingCost = deliveryOption === "delivery" ? DELIVERY_FEE : 0;
   const orderTotal   = subtotal + shippingCost;
   const loyaltyPts   = Math.floor(subtotal);
+  const total10mlQty = cart.reduce((sum, item) => sum + ((item.variant === "10ml") ? item.quantity : 0), 0);
+  const total50mlQty = cart.reduce((sum, item) => sum + ((item.variant === "50ml") ? item.quantity : 0), 0);
+  const freeSleeveQty = total10mlQty;
+  const freeTesterQty = isMember ? total50mlQty : 0;
   const fmt          = (val) => `SGD ${Number(val).toFixed(2)}`;
 
   const handleCheckout = async () => {
@@ -352,6 +386,7 @@ const Checkout = () => {
       const response = await API.post("/create-checkout-session", {
         items: cart,
         deliveryOption,
+        isMember,
       });
       // redirectToCheckout is deprecated — use the session URL directly
       const { url } = response.data;
@@ -501,6 +536,9 @@ const Checkout = () => {
                             <> · <span>Bundle</span></>
                           )}
                         </p>
+                        {Array.isArray(item.bundleSelections) && item.bundleSelections.length > 0 && (
+                          <p className="co-item__meta">Scents: {item.bundleSelections.join(", ")}</p>
+                        )}
                       </div>
                       <span className="co-item__price">
                         {fmt(item.price * item.quantity)}
@@ -542,6 +580,25 @@ const Checkout = () => {
               <span className="co-summary__total-label">Total</span>
               <span className="co-summary__total-val">{fmt(orderTotal)}</span>
             </div>
+
+            {(freeSleeveQty > 0 || freeTesterQty > 0 || total50mlQty > 0) && (
+              <div className="co-gifts">
+                <p className="co-gifts__title">Free Gifts</p>
+                {freeSleeveQty > 0 && (
+                  <p className="co-gifts__item">
+                    <strong>{freeSleeveQty}× free Plain Sleeve</strong> (random Midnight Black/Pearl White)
+                  </p>
+                )}
+                {freeTesterQty > 0 && (
+                  <p className="co-gifts__item">
+                    <strong>{freeTesterQty}× free 1.5ml tester</strong> for member 50ml purchases
+                  </p>
+                )}
+                {total50mlQty > 0 && !isMember && (
+                  <p className="co-gifts__note">Member login required for free 1.5ml tester on 50ml purchases.</p>
+                )}
+              </div>
+            )}
 
             {/* loyalty points */}
             <div className="co-loyalty">

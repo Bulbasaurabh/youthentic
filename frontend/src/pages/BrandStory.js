@@ -87,7 +87,11 @@ const css = `
   }
   .ab-hero__title em { font-style: italic; color: var(--gold); }
   .ab-hero__sub {
-    font-size: clamp(0.85rem, 1.5vw, 1rem); line-height: 1.8; color: var(--muted); max-width: 52ch;
+    font-size: clamp(0.95rem, 1.5vw, 1.05rem); line-height: 1.85; color: rgba(255,255,255,0.9); max-width: 52ch;
+    padding: 0.8rem 1.1rem;
+    background: rgba(0,0,0,0.42);
+    border: 1px solid rgba(201,168,76,0.2);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
     animation: fadeUp 1s ease forwards 0.7s; opacity: 0;
   }
   .ab-hero__scroll {
@@ -420,16 +424,16 @@ const FAQ_DATA = {
     { q: "What is Youthentic Lite?", a: "Youthentic Lite is our pocket-sized 10ml fragrance line — designed to be travel-friendly, MRT-safe, and easy to carry throughout your day without compromising on scent quality." },
     { q: "Are Youthentic fragrances long-lasting?", a: "Yes. Our formulas are oil-based and heat-stabilised for Singapore's humidity. Depending on the scent and your skin type, you can expect 4–8 hours of wear from a single application." },
     { q: "Are the products unisex?", a: "Most of our scents are designed to be unisex or gender-neutral. Each product page includes a gender recommendation to help you choose." },
-    { q: "Are Youthentic fragrances made in-house?", a: "Yes — every fragrance is formulated and produced by us in Indonesia, using high-quality imported raw materials sourced from Barcelona and Grasse, France." },
+    { q: "Are Youthentic fragrances made in-house?", a: "Yes — every fragrance is formulated in Barcelona and produced by us in Indonesia, using high-quality raw materials locally sourced." },
     { q: "Are the products BPOM/HSA certified?", a: "Our products are produced under Indonesian BPOM-compliant standards. For Singapore customers, our formulas comply with HSA cosmetics regulations for personal fragrance." },
     { q: "What sizes are available?", a: "We currently offer 10ml travel-size bottles and select scents in 50ml full-size. Bundle sets are also available exclusively on our website." },
   ],
   Shipping: [
     { q: "How long does delivery take in Singapore?", a: "Standard islandwide delivery takes 3–5 business days. Self-collection is also available and is typically ready within 1–2 business days. You'll receive an email with details once your order is confirmed." },
-    { q: "Do you ship internationally?", a: "Currently, this Singapore store ships within Singapore only. For international orders, please visit our Indonesia site at youthentic.vercel.app." },
     { q: "Are there any duties or hidden fees?", a: "No hidden fees. All prices are displayed in SGD and include GST. There are no additional duties for Singapore orders — what you see at checkout is what you pay." },
     { q: "What are the shipping costs?", a: "Home delivery is a flat SGD 5.00. Orders with self-collection are free. We may offer free delivery promotions from time to time — check our homepage for the latest." },
     { q: "Can I change my delivery address after ordering?", a: "Please contact us as soon as possible if you need to change your address. We can update it if your order hasn't been dispatched yet." },
+    { q: "How do you ensure products are protected and won’t get damaged during delivery?", a: "All orders are packed securely with protective materials and shipped in sturdy packaging to help prevent damage during delivery." },
   ],
   Usage: [
     { q: "How do I apply the fragrance?", a: "Spray or dab onto pulse points — wrists, neck, and behind the ears. For longer wear, apply right after showering on moisturised skin. Avoid rubbing the fragrance after application as this breaks down the scent molecules." },
@@ -438,10 +442,10 @@ const FAQ_DATA = {
     { q: "Is the fragrance suitable for sensitive skin?", a: "Our formulas are designed to be gentle, but we recommend patch testing on a small area if you have sensitive skin. Avoid direct contact with eyes." },
   ],
   Loyalty: [
-    { q: "How does the Youthentic Rewards program work?", a: "Every SGD you spend earns 1 loyalty point. Points accumulate toward tiers — Bronze (0–499 pts), Silver (500–1999 pts), and Gold (2000+ pts). Higher tiers unlock better multipliers and exclusive benefits." },
-    { q: "What are the Gold tier benefits?", a: "Gold members earn 2× points on every purchase, receive an automatic 10% discount on all orders, get priority early access to new releases, and enjoy free express shipping." },
-    { q: "Do my points expire?", a: "Points do not expire as long as your account remains active. We define active as making at least one purchase within any 12-month period." },
-    { q: "How do I check my points balance?", a: "Visit the Rewards page on our website after completing a purchase. Your points and current tier are displayed on your profile." },
+    { q: "How does the Youthentic Rewards program work?", a: "Every SGD you spend earns 1 loyalty point. Points accumulate toward tiers — Bronze (0–119 pts), Silver (120–499 pts), and Gold (500+ pts). Higher tiers unlock better multipliers and exclusive benefits." },
+    { q: "What are the different loyalty benefits?", a: "Visit the Loyalty page on our website for a detailed breakdown, but in general: Bronze members earn 1 point per SGD, Silver members earn 1.5 points per SGD and get early access to new releases, and Gold members earn 2 points per SGD plus free shipping on all orders." },
+    { q: "Do my points expire?", a: "Points do not expire as long as you make the minimum required purchases within a 24-month period." },
+    { q: "How do I check my points balance?", a: "Visit the Orders page on our website after completing a purchase. Your points and current tier are displayed on your profile." },
   ],
   Other: [
     { q: "What payment methods do you accept?", a: "We accept all major credit and debit cards (Visa, Mastercard, Amex), as well as PayNow and GrabPay via Stripe Checkout." },
@@ -511,16 +515,12 @@ const BrandStory = () => {
         <div className="ab-hero__rule" aria-hidden="true" />
         <div className="ab-hero__glow" aria-hidden="true" />
         <div className="ab-hero__content">
-          <p className="ab-hero__eyebrow">Crafted in Indonesia · Refined for Singapore</p>
+          <p className="ab-hero__eyebrow">Formulated in Barcelona · Refined for Singapore</p>
           <h1 className="ab-hero__title">More than a<br /><em>fragrance.</em></h1>
           <p className="ab-hero__sub">
             Discover the philosophy, the people, and the passion behind
             Southeast Asia's most authentic pocket-sized luxury.
           </p>
-        </div>
-        <div className="ab-hero__scroll" aria-hidden="true">
-          <span>Explore</span>
-          <div className="ab-scroll-line" />
         </div>
       </section>
 
@@ -601,7 +601,7 @@ const BrandStory = () => {
             {[
               { year: "2021", filled: false, title: "Founded", desc: "Youthentic launches in Indonesia with three signature scents and a bold vision." },
               { year: "2023", filled: false, title: "Barcelona Sourcing", desc: "We establish ingredient partnerships with premium European suppliers." },
-              { year: "2024", filled: false, title: "Lite Line Launches", desc: "The Youthentic Lite pen format redefines pocket-sized luxury fragrance." },
+              { year: "2024", filled: false, title: "Lite Line Launches", desc: "Youthentic Lite redefines pocket-sized luxury fragrance." },
               { year: "2025", filled: true,  title: "Singapore Arrives", desc: "We bring the full collection to Singapore — crafted for this city's pace and heat." },
             ].map((t) => (
               <div key={t.year} className="ab-timeline__item">

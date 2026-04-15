@@ -1,5 +1,6 @@
 import os
 import json
+import random
 import stripe
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,6 +33,10 @@ app.add_middleware(
 # FIX 1: Delivery fee in cents to match Stripe (SGD 5.00 = 500 cents)
 # and matches DELIVERY_FEE = 5.00 in your CartContext (dollars)
 DELIVERY_FEE_CENTS = 500  # SGD 5.00
+FREE_SLEEVE_OPTIONS = [
+    "Plain Sleeve (Midnight Black)",
+    "Plain Sleeve (Pearl White)",
+]
 
 # Tier thresholds — must match LoyaltyContext.js TIERS array
 def calc_tier(points: int) -> str:
@@ -40,6 +45,47 @@ def calc_tier(points: int) -> str:
     elif points >= 500:
         return "Silver"
     return "Bronze"
+
+
+def build_promotional_items(items: list, is_member: bool) -> list:
+    total_10ml = 0
+    total_50ml = 0
+
+    for item in items:
+        qty = int(item.get("quantity", 0) or 0)
+        variant = str(item.get("variant", "")).lower()
+        if variant == "10ml":
+            total_10ml += qty
+        elif variant == "50ml":
+            total_50ml += qty
+
+    promo_items = []
+
+    if total_10ml > 0:
+        sleeve_counts = {name: 0 for name in FREE_SLEEVE_OPTIONS}
+        for _ in range(total_10ml):
+            sleeve_counts[random.choice(FREE_SLEEVE_OPTIONS)] += 1
+
+        for name, qty in sleeve_counts.items():
+            if qty > 0:
+                promo_items.append({
+                    "name": name,
+                    "price": 0,
+                    "quantity": qty,
+                    "variant": "promo-gift",
+                    "is_free_gift": True,
+                })
+
+    if is_member and total_50ml > 0:
+        promo_items.append({
+            "name": "1.5ml Tester",
+            "price": 0,
+            "quantity": total_50ml,
+            "variant": "promo-gift",
+            "is_free_gift": True,
+        })
+
+    return promo_items
 
 
 # -----------------------------
@@ -118,11 +164,13 @@ async def earn_loyalty(data: dict):
 async def create_checkout_session(data: dict):
     items           = data.get("items", [])
     delivery_option = data.get("deliveryOption", "self")
+    is_member       = bool(data.get("isMember", False))
 
     if not items:
         raise HTTPException(status_code=400, detail="No items in cart")
 
     line_items = []
+    promo_items = build_promotional_items(items, is_member)
 
     for item in items:
         # FIX 4: price comes in as dollars → multiply by 100 for Stripe cents
@@ -133,7 +181,14 @@ async def create_checkout_session(data: dict):
         if item.get("variant") and item["variant"] != "bundle":
             name = f"{item['name']} ({item['variant']})"
         elif item.get("variant") == "bundle":
-            name = f"{item['name']} – Bundle"
+            selections = item.get("bundleSelections") or []
+            if isinstance(selections, list) and selections:
+                preview = ", ".join(selections[:3])
+                if len(selections) > 3:
+                    preview += ", ..."
+                name = f"{item['name']} – Bundle ({preview})"
+            else:
+                name = f"{item['name']} – Bundle"
 
         line_items.append({
             "price_data": {
@@ -161,15 +216,17 @@ async def create_checkout_session(data: dict):
         # FIX 5: store cart data in metadata so webhook can retrieve it
         metadata={
             "delivery_option": delivery_option,
+            "is_member": str(is_member).lower(),
             "items": json.dumps([
                 {
                     "name":     i["name"],
                     "price":    i["price"],
                     "quantity": i["quantity"],
                     "variant":  i.get("variant", ""),
+                    "bundleSelections": i.get("bundleSelections", []),
                 }
                 for i in items
-            ]),
+            ] + promo_items),
         },
         # Collect email at checkout so we have it in the webhook
         customer_email=None,  # leave None — Stripe will collect it on the form

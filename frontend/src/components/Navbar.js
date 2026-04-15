@@ -82,6 +82,8 @@ const css = `
   }
   .yt-nav__links a:hover { color: var(--white); }
   .yt-nav__links a:hover::after { transform: scaleX(1); }
+  .yt-nav__links a.active { color: var(--white); }
+  .yt-nav__links a.active::after { transform: scaleX(1); }
 
   /* ─── RIGHT CLUSTER ────────────────────────────────────────────── */
   .yt-nav__right {
@@ -221,6 +223,7 @@ const css = `
     transition: color 0.2s, padding-left 0.2s;
   }
   .yt-nav__drawer-links a:hover { color: var(--gold); padding-left: 0.5rem; }
+  .yt-nav__drawer-links a.active { color: var(--gold); padding-left: 0.5rem; }
 
   .yt-nav__drawer-cta {
     margin-top: 2.5rem;
@@ -268,8 +271,14 @@ const NAV_LINKS = [
 
 const Navbar = () => {
   const { cart } = useCart();
+  const { pathname } = useLocation();
   const [scrolled,     setScrolled]     = useState(false);
   const [menuOpen,     setMenuOpen]     = useState(false);
+
+  const isActivePage = (href) => {
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   // total item count across all cart entries
   const cartCount = cart.reduce((sum, item) => sum + (item.quantity ?? 1), 0);
@@ -301,7 +310,9 @@ const Navbar = () => {
         {/* Desktop links */}
         <ul className="yt-nav__links">
           {NAV_LINKS.map((l) => (
-            <li key={l.href}><Link to={l.href}>{l.label}</Link></li>
+            <li key={l.href}>
+              <Link to={l.href} className={isActivePage(l.href) ? "active" : ""}>{l.label}</Link>
+            </li>
           ))}
         </ul>
 
@@ -347,7 +358,7 @@ const Navbar = () => {
         <ul className="yt-nav__drawer-links">
           {NAV_LINKS.map((l) => (
             <li key={l.href}>
-              <Link to={l.href} onClick={closeMenu}>{l.label}</Link>
+              <Link to={l.href} onClick={closeMenu} className={isActivePage(l.href) ? "active" : ""}>{l.label}</Link>
             </li>
           ))}
         </ul>

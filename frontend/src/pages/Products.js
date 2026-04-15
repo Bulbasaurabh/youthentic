@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo,useCallback  } from "react";
+﻿import React, { useEffect, useState, useMemo,useCallback  } from "react";
 import { useCart } from "../context/CartContext";
 import Footer from "../components/Footer";
 import API from "../api/api";
@@ -53,6 +53,15 @@ const ACCESSORIES = [
     collab: null,
   },
   {
+    id: "acc-11",
+    name: "Plain Sleeve (Navy Blue)",
+    desc: "Premium navy blue sleeve for a luxurious finish.",
+    price: "SGD 5.90",
+    tag: null,
+    emoji: "✨",
+    collab: null,
+  },
+  {
     id: "acc-4",
     name: "Floral Sleeve (Sky Blue)",
     desc: "A refreshing sky blue sleeve with a floral design.",
@@ -81,19 +90,19 @@ const ACCESSORIES = [
   },
   {
     id: "acc-7",
-    name: "PopMart Miffy × Youthentic Sleeve",
+    name: "PopMart Sanrio × Youthentic Sleeve",
     desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
     price: "SGD 9.90",
-    tag: "Limited Edition",
+    tag: "Coming Soon",
     emoji: "🎨",
     collab: "PopMart",
   },
   {
     id: "acc-8",
-    name: "PopMart Butterbear × Youthentic Sleeve",
+    name: "PopMart Teddy Gummy × Youthentic Sleeve",
     desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
     price: "SGD 9.90",
-    tag: "Limited Edition",
+    tag: "Coming Soon",
     emoji: "🎨",
     collab: "PopMart",
   },
@@ -102,14 +111,14 @@ const ACCESSORIES = [
     name: "PopMart Twinkle × Youthentic Sleeve",
     desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
     price: "SGD 9.90",
-    tag: "Limited Edition",
+    tag: "Coming Soon",
     emoji: "🎨",
     collab: "PopMart",
   },
 
   {
-    id: "acc-7",
-    name: "Custom Engraving",
+    id: "acc-10",
+    name: "Custom Sleeve Engraving",
     desc: "Add a personal message or name to any sleeve. Perfect for gifting.",
     price: "SGD 8.90",
     tag: "Personalised",
@@ -162,8 +171,12 @@ const css = `
   .pr-hero__title span { color: var(--gold); }
   .pr-hero__sub {
     position: relative; z-index: 1; font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(1rem, 1.5vw, 1.2rem); font-weight: 300; font-style: italic;
-    color: var(--muted); max-width: 48ch; line-height: 1.7;
+    font-size: clamp(1rem, 1.5vw, 1.2rem); font-weight: 400; font-style: italic;
+    color: rgba(255,255,255,0.9); max-width: 52ch; line-height: 1.85;
+    padding: 0.8rem 1.1rem;
+    background: rgba(0,0,0,0.42);
+    border: 1px solid rgba(201,168,76,0.2);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
     animation: fadeUp 0.9s ease forwards 0.5s; opacity: 0;
   }
   .pr-hero__badges {
@@ -308,7 +321,7 @@ const css = `
   .pr-acc__scroll::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); }
  
   .pr-acc-card {
-    background: var(--dark); min-width: 260px; max-width: 260px;
+    background: var(--dark); min-width: 300px; max-width: 300px;
     display: flex; flex-direction: column;
     transition: background 0.25s; flex-shrink: 0;
   }
@@ -363,10 +376,46 @@ const css = `
   .pr-acc-card__footer {
     display: flex; align-items: center; justify-content: space-between;
     padding-top: 0.75rem; border-top: 1px solid rgba(201,168,76,0.08); margin-top: auto;
+    gap: 0.55rem;
   }
   .pr-acc-card__price {
     font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
     letter-spacing: 0.05em; color: var(--gold);
+    white-space: nowrap;
+  }
+  .pr-acc-card__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-left: auto;
+  }
+  .pr-acc-card__qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(201,168,76,0.24);
+    background: rgba(255,255,255,0.01);
+    height: 1.95rem;
+  }
+  .pr-acc-card__qty-btn {
+    width: 1.75rem;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: color 0.2s, background 0.2s;
+  }
+  .pr-acc-card__qty-btn:hover { color: var(--gold); background: rgba(201,168,76,0.06); }
+  .pr-acc-card__qty-btn:disabled { color: #444; cursor: not-allowed; background: transparent; }
+  .pr-acc-card__qty-num {
+    min-width: 1.75rem;
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--white);
+    border-left: 1px solid rgba(201,168,76,0.2);
+    border-right: 1px solid rgba(201,168,76,0.2);
   }
   .pr-acc-card__cta {
     font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
@@ -439,11 +488,8 @@ const css = `
    Uses the same require() pattern as ProductCard.
    Falls back to emoji placeholder if image not found.
 ─────────────────────────────────────────────────────────────────────── */
-const getAccImage = (name) => {
-  try { return require(`../assets/${name}.png`); }
-  catch { return null; }
-};
- 
+const getAccImage = (name) => `/assets/${name}.png`
+
 const AccImage = ({ name, emoji }) => {
   const [err, setErr] = React.useState(false);
   const src = getAccImage(name);
@@ -472,6 +518,10 @@ const AccImage = ({ name, emoji }) => {
 ─────────────────────────────────────────────────────────────────────── */
 const AccCard = ({ acc, addToCart }) => {
   const [added, setAdded] = useState(false);
+  const [qty, setQty] = useState(1);
+
+  const decQty = useCallback(() => setQty((q) => Math.max(1, q - 1)), []);
+  const incQty = useCallback(() => setQty((q) => Math.min(20, q + 1)), []);
  
   const handleAdd = useCallback(() => {
     if (added) return;
@@ -487,11 +537,12 @@ const AccCard = ({ acc, addToCart }) => {
         stock:       99,
         variant_type: "accessory",
       },
-      "accessory"
+      "accessory",
+      { quantity: qty }
     );
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
-  }, [acc, added, addToCart]);
+  }, [acc, added, addToCart, qty]);
  
   return (
     <div className="pr-acc-card">
@@ -511,12 +562,19 @@ const AccCard = ({ acc, addToCart }) => {
         <p className="pr-acc-card__desc">{acc.desc}</p>
         <div className="pr-acc-card__footer">
           <span className="pr-acc-card__price">{acc.price}</span>
-          <button
-            className={`pr-acc-card__cta${added ? " added" : ""}`}
-            onClick={handleAdd}
-          >
-            {added ? "✓ Added" : "Add On →"}
-          </button>
+          <div className="pr-acc-card__controls">
+            <div className="pr-acc-card__qty">
+              <button type="button" className="pr-acc-card__qty-btn" onClick={decQty} disabled={qty <= 1}>−</button>
+              <span className="pr-acc-card__qty-num">{qty}</span>
+              <button type="button" className="pr-acc-card__qty-btn" onClick={incQty} disabled={qty >= 20}>+</button>
+            </div>
+            <button
+              className={`pr-acc-card__cta${added ? " added" : ""}`}
+              onClick={handleAdd}
+            >
+              {added ? `✓ Added ${qty}` : `Add ${qty} →`}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -597,8 +655,8 @@ const Products = () => {
         <p className="pr-hero__eyebrow">Youthentic Singapore · 2025 Collection</p>
         <h1 className="pr-hero__title">FIND YOUR<br /><span>SCENT.</span></h1>
         <p className="pr-hero__sub">
-          Pocket-sized luxury, crafted in Indonesia.
-          Every formula heat-tested and humidity-stable for Singapore.
+          Formulated in Barcelona, made in Indonesia.
+          Every product heat-tested and humidity-stable for Singapore.
         </p>
         <div className="pr-hero__badges">
           <div className="pr-hero__badge">
@@ -607,7 +665,7 @@ const Products = () => {
           </div>
           <div className="pr-hero__badge pr-hero__badge--drop">
             <div className="pr-hero__badge-dot" />
-            {dropCount} Weekend Drop — This Weekend Only
+            {dropCount} Weekend Drops — This Weekend Only
           </div>
         </div>
       </section>
@@ -703,7 +761,7 @@ const Products = () => {
                   <div key={product.id} className={(isExclusive || isDrop) ? "pr-exclusive-wrap" : ""}>
                     {isDrop && <div className="pr-drop-tag">⚡ Weekend Drop</div>}
                     {isExclusive && <div className={`pr-exclusive-tag${isDrop ? " pr-drop-tag--offset" : ""}`}>✦ Web Exclusive</div>}
-                    <ProductCard product={product} />
+                    <ProductCard product={product} allProducts={products} />
                   </div>
                 );
               })}
