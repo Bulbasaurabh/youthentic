@@ -4,7 +4,7 @@ const css = `
   .yt-footer {
     background: #000000;
     border-top: 1px solid rgba(201,168,76,0.2);
-    padding: 3rem;
+    padding: 2rem 3rem 1.25rem;
     font-family: 'Jost', sans-serif;
   }
   .yt-footer__top {
@@ -24,7 +24,7 @@ const css = `
   .yt-footer__tagline {
     font-family: 'Cormorant Garamond', serif;
     font-size: 0.92rem; font-style: italic; font-weight: 300;
-    color: #555; line-height: 1.7; max-width: 26ch;
+    color: rgba(255,255,255,0.76); line-height: 1.7; max-width: 26ch;
   }
   .yt-footer__sg-badge {
     display: inline-flex; align-items: center; gap: 0.5rem;
@@ -50,20 +50,12 @@ const css = `
   }
   .yt-footer__link--ext::after { content: '↗'; font-size: 0.65rem; opacity: 0.5; }
 
-  .yt-footer__bottom {
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 1rem;
+  .yt-footer__copy {
+    font-size: 0.68rem; color: rgba(136,136,136,0.4); letter-spacing: 0.06em;
   }
-  .yt-footer__copy { font-size: 0.68rem; color: rgba(136,136,136,0.4); letter-spacing: 0.06em; }
-  .yt-footer__bottom-links { display: flex; gap: 1.5rem; }
-  .yt-footer__bottom-links a {
-    font-size: 0.65rem; letter-spacing: 0.08em; color: #444;
-    text-decoration: none; text-transform: uppercase; transition: color 0.2s;
-  }
-  .yt-footer__bottom-links a:hover { color: #C9A84C; }
 
   @media (max-width: 900px) {
-    .yt-footer { padding: 2.5rem 1.5rem; }
+    .yt-footer { padding: 1.75rem 1.5rem 1rem; }
     .yt-footer__top { grid-template-columns: 1fr 1fr; gap: 2rem; }
     .yt-footer__brand-col { grid-column: 1 / -1; }
   }
@@ -83,12 +75,13 @@ const Footer = () => (
         <div className="yt-footer__brand-col">
           <Link to="/" className="yt-footer__wordmark">YOUTHENTIC</Link>
           <p className="yt-footer__tagline">
-            Pocket-sized luxury fragrances, crafted in Indonesia.
+            Formulated in Barcelona, made in Indonesia.
             Heat-tested and humidity-stable for Singapore.
           </p>
           <div className="yt-footer__sg-badge">
             <span>🇸🇬</span> Singapore Official Store
           </div>
+          <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore · All rights reserved</span>
         </div>
 
         {/* SHOP */}
@@ -104,16 +97,15 @@ const Footer = () => (
         <div className="yt-footer__col">
           <p className="yt-footer__col-title">Account</p>
           <Link to="/login"   className="yt-footer__link">Track My Order</Link>
-          <Link to="/loyalty" className="yt-footer__link">Rewards Program</Link>
-          <Link to="/brand-story" className="yt-footer__link">FAQ</Link>
+          <Link to="/loyalty" className="yt-footer__link">Loyalty Program</Link>
+          <Link to="/brand-story#faq" className="yt-footer__link">FAQ</Link>
           <Link to="/brand-story" className="yt-footer__link">Our Story</Link>
         </div>
 
         {/* INFO */}
         <div className="yt-footer__col">
           <p className="yt-footer__col-title">Info</p>
-          <Link to="/checkout" className="yt-footer__link">Shipping Info</Link>
-          <Link to="/faq"      className="yt-footer__link">Returns Policy</Link>
+          <Link to="/brand-story#faq"      className="yt-footer__link">Returns Policy</Link>
           <a
             href="https://youthentic.vercel.app/"
             target="_blank"
@@ -125,15 +117,6 @@ const Footer = () => (
           <Link to="/admin" className="yt-footer__link">Admin</Link>
         </div>
 
-      </div>
-
-      <div className="yt-footer__bottom">
-        <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore · All rights reserved</span>
-        <div className="yt-footer__bottom-links">
-          <Link to="/brand-story">Privacy</Link>
-          <Link to="/brand-story">Terms</Link>
-          <Link to="/brand-story">Contact</Link>
-        </div>
       </div>
     </footer>
   </>

@@ -6,16 +6,16 @@
 
 export const RENEWAL_RULES = {
   Silver: {
-    requiredSpend: 119,
+    requiredSpend: 120,
     failTier:      "Bronze",
     failPoints:    0,                // reset to 0 on failure
-    label:         "SGD 119 every 2 years",
+    label:         "120 points every 2 years",
   },
   Gold: {
     requiredSpend: 250,
-    failTier:      "Silver",
-    failPoints:    120,              // drops to top of Silver range
-    label:         "SGD 250 every 2 years",
+    failTier:      "Bronze",
+    failPoints:    0,              // reset to 0 on failure
+    label:         "500 points every 2 years",
   },
 };
 

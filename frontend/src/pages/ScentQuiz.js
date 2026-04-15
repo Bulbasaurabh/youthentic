@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import API from "../api/api";
 import Footer from "../components/Footer";
 
 const css = `
@@ -328,52 +329,46 @@ const css = `
   }
 `;
 
-/* ─── SCENT DATABASE ────────────────────────────────────────────────
-   Each scent maps to profile tags so the quiz can score matches.
-   Tags: fresh | bold | floral | woody | citrus | musky | evening | light
-───────────────────────────────────────────────────────────────────── */
-const SCENTS = [
-  {
-    name: "Citrus Rush",
-    notes: "Grapefruit · Bergamot · Green Tea",
-    tags: ["fresh", "citrus", "light", "day"],
-  },
-  {
-    name: "Ethereal Bloom",
-    notes: "Peony · White Musk · Soft Amber",
-    tags: ["floral", "light", "fresh", "day"],
-  },
-  {
-    name: "Lumira",
-    notes: "Neroli · Jasmine · Cedarwood",
-    tags: ["floral", "woody", "fresh", "day"],
-  },
-  {
-    name: "Celestial Drift",
-    notes: "Sea Salt · Driftwood · Soft Musk",
-    tags: ["fresh", "musky", "light", "day"],
-  },
-  {
-    name: "Velvet Essence",
-    notes: "Sandalwood · Warm Amber · Vanilla",
-    tags: ["woody", "musky", "bold", "evening"],
-  },
-  {
-    name: "Noche",
-    notes: "Oud · Dark Rose · Black Pepper",
-    tags: ["bold", "floral", "musky", "evening"],
-  },
-  {
-    name: "Noir",
-    notes: "Tobacco · Leather · Dark Amber",
-    tags: ["bold", "woody", "musky", "evening"],
-  },
-  {
-    name: "Crimson Woods",
-    notes: "Cedarwood · Oud · Spiced Vetiver",
-    tags: ["bold", "woody", "citrus", "evening"],
-  },
-];
+const toText = (v) => {
+  if (Array.isArray(v)) return v.join(" ");
+  return String(v ?? "");
+};
+
+const buildScentTags = (product) => {
+  const text = [
+    product?.name,
+    product?.description,
+    product?.category,
+    product?.top_notes,
+    toText(product?.occasion),
+  ].join(" ").toLowerCase();
+
+  const tags = new Set();
+
+  if (/(fresh|clean|sea|water|green|tea)/.test(text)) tags.add("fresh");
+  if (/(citrus|bergamot|grapefruit|lemon|orange|mandarin|neroli)/.test(text)) tags.add("citrus");
+  if (/(floral|jasmine|rose|peony|lily|violet|bloom)/.test(text)) tags.add("floral");
+  if (/(woody|wood|cedar|sandal|vetiver|patchouli)/.test(text)) tags.add("woody");
+  if (/(musk|amber|oud|leather|tobacco|vanilla|spice)/.test(text)) tags.add("musky");
+  if (/(evening|night|date|intense|bold|mysterious)/.test(text)) tags.add("evening");
+  if (/(day|daily|office|light|airy|subtle)/.test(text)) tags.add("day");
+  if (/(light|airy|soft|subtle)/.test(text)) tags.add("light");
+  if (/(bold|intense|rich|deep|dark|power)/.test(text)) tags.add("bold");
+
+  if (tags.size === 0) {
+    tags.add("fresh");
+    tags.add("light");
+    tags.add("day");
+  }
+
+  return [...tags];
+};
+
+const mapProductToScent = (product) => ({
+  name: product?.name ?? "Unknown",
+  notes: product?.top_notes ? String(product.top_notes).replace(/\s*,\s*/g, " · ") : "Top notes unavailable",
+  tags: buildScentTags(product),
+});
 
 /* ─── QUIZ QUESTIONS ────────────────────────────────────────────────
    Each answer pushes tag weights used to score scents at the end.
@@ -434,13 +429,13 @@ const QUESTIONS = [
 ];
 
 /* ─── SCORING ───────────────────────────────────────────────────── */
-const scoreScents = (answers) => {
+const scoreScents = (scents, answers) => {
   const weights = {};
   answers.forEach((tags) =>
     tags.forEach((tag) => { weights[tag] = (weights[tag] || 0) + 1; })
   );
 
-  return SCENTS
+  return scents
     .map((scent) => ({
       ...scent,
       score: scent.tags.reduce((sum, tag) => sum + (weights[tag] || 0), 0),
@@ -464,8 +459,25 @@ const ScentQuiz = () => {
   const [step,    setStep]    = useState(0);       // 0 = intro, 1..N = questions, N+1 = result
   const [answers, setAnswers] = useState([]);       // array of tag arrays
   const [animKey, setAnimKey] = useState(0);        // forces re-animation on step change
+  const [scents,  setScents]  = useState([]);
 
   const totalSteps = QUESTIONS.length;
+    useEffect(() => {
+      API.get("/products")
+        .then((res) => {
+          const rows = Array.isArray(res.data) ? res.data : [];
+          // Quiz scents come from product catalog; notes map from top_notes column.
+          const mapped = rows
+            .filter((p) => p && p.name)
+            .map(mapProductToScent);
+          setScents(mapped);
+        })
+        .catch((err) => {
+          console.error("Failed to load quiz scents", err);
+          setScents([]);
+        });
+    }, []);
+
   const isIntro    = step === 0;
   const isResult   = step > totalSteps;
   const question   = !isIntro && !isResult ? QUESTIONS[step - 1] : null;
@@ -484,7 +496,7 @@ const ScentQuiz = () => {
     setAnimKey((k) => k + 1);
   };
 
-  const matches = isResult ? scoreScents(answers) : [];
+  const matches = isResult ? scoreScents(scents, answers) : [];
   const profile = isResult ? buildProfile(answers) : [];
 
   return (

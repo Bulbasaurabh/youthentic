@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import API from "../api/api";
+import { getTierByPoints } from "../context/LoyaltyContext";
 import Footer from "../components/Footer";
 
 const css = `
@@ -153,10 +154,15 @@ const Login = () => {
       const userData  = userRes.status  === "fulfilled" ? userRes.value.data   : {};
       const isMember  = userRes.status === "fulfilled";
 
+  // Calculate tier from order totals (points-based system: 1 point per SGD)
+  const totalSpent = orders.reduce((s, o) => s + (o.total_amount ?? 0), 0);
+  const points = Math.floor(totalSpent);
+  const calculatedTier = getTierByPoints(points).name;
+
       if (isMember) {
         localStorage.setItem("yt_member_profile", JSON.stringify({
           email: trimmed,
-          tier: userData.tier ?? "Bronze",
+          tier: calculatedTier,
           isMember: true,
           updatedAt: Date.now(),
         }));
@@ -169,7 +175,7 @@ const Login = () => {
           orders,
           email:     trimmed,
           createdAt: userData.created_at ?? null,
-          tier:      userData.tier       ?? "Bronze",
+          tier:      calculatedTier,
         },
       });
     } catch (e) {

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLoyalty, TIERS, getTierByPoints } from "../context/LoyaltyContext";
 import { getRenewalStatus, RENEWAL_RULES } from "../utils/loyaltyRenewal";
 import API from "../api/api";
+import Footer from "../components/Footer";
 
 const assetUrl = (fileName) => `${process.env.PUBLIC_URL || ""}/assets/${encodeURIComponent(fileName)}`;
 
@@ -755,17 +756,7 @@ const Loyalty = () => {
           </Link>
         </section>
 
-        {/* ── FOOTER ──────────────────────────────────────────────── */}
-        <footer className="yt-footer">
-          <span className="yt-footer__brand">YOUTHENTIC</span>
-          <ul className="yt-footer__links">
-            <li><Link to="/products">Shop</Link></li>
-            <li><Link to="/about">About</Link></li>
-            <li><Link to="/quiz">Scent Quiz</Link></li>
-            <li><Link to="/contact">Contact</Link></li>
-          </ul>
-          <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
-        </footer>
+              <Footer />
       </div>
     </>
   );

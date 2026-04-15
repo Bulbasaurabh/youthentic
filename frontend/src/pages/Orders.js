@@ -2,6 +2,7 @@ import {useState} from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import { getRenewalStatus } from "../utils/loyaltyRenewal";
+import { getTierByPoints } from "../context/LoyaltyContext";
 
 const assetUrl = (fileName) => `${process.env.PUBLIC_URL || ""}/assets/${encodeURIComponent(fileName)}`;
 const TIER_ICONS = {
@@ -304,7 +305,6 @@ const Orders = () => {
   const orders     = state?.orders ?? [];
   const email      = state?.email  ?? "";
   const createdAt  = state?.createdAt ?? null;
-  const tier       = state?.tier ?? "Bronze";
   const renewalStart = createdAt ?? getEarliestOrderDate(orders);
 
   // if navigated directly without state, send back to login
@@ -314,6 +314,9 @@ const Orders = () => {
   }
 
   const totalSpent = orders.reduce((s, o) => s + (o.total_amount ?? 0), 0);
+  const points = Math.floor(totalSpent); // 1 point per SGD spent
+  const tierData = getTierByPoints(points);
+  const tier = tierData.name;
   const paidOrders = orders.filter((o) => ["paid","complete","succeeded"].includes((o.payment_status ?? "").toLowerCase()));
   const renewal    = getRenewalStatus(tier, renewalStart, orders);
   const displayTier = renewal?.tier ?? tier;
@@ -385,8 +388,8 @@ const Orders = () => {
                   <div className="ord-renewal__body">
                     <div className="ord-renewal__bar-row">
                       <div className="ord-renewal__bar-labels">
-                        <span className="ord-renewal__bar-spent">SGD {renewal.spent.toFixed(2)} spent this window</span>
-                        <span className="ord-renewal__bar-req">SGD {renewal.rule.requiredSpend} required</span>
+                        <span className="ord-renewal__bar-spent">{Math.floor(renewal.spent)} points accumulated this window</span>
+                        <span className="ord-renewal__bar-req">{renewal.rule.requiredSpend} points required</span>
                       </div>
                       <div className="ord-renewal__bar-track">
                         <div
@@ -407,8 +410,8 @@ const Orders = () => {
                       {renewal.pct >= 100
                         ? `✓ ${displayTier} status secured until ${renewal.expiryDateStr}.`
                         : renewal.daysLeft < 60
-                        ? `⚠ Only ${renewal.daysLeft} days left to spend SGD ${renewal.remaining.toFixed(2)} more and keep your ${displayTier} status.`
-                        : `Spend SGD ${renewal.remaining.toFixed(2)} more before ${renewal.expiryDateStr} to maintain ${displayTier}. If you don't, your tier will drop to ${renewal.rule.failTier}.`
+                        ? `⚠ Only ${renewal.daysLeft} days left to accumulate ${renewal.remaining.toFixed(2)} more points and keep your ${displayTier} status.`
+                        : `Accumulate ${renewal.remaining.toFixed(2)} more points before ${renewal.expiryDateStr} to maintain ${displayTier}. If you don't, your tier will drop to ${renewal.rule.failTier}.`
                       }
                     </div>
                   </div>

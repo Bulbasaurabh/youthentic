@@ -38,15 +38,6 @@ FREE_SLEEVE_OPTIONS = [
     "Plain Sleeve (Pearl White)",
 ]
 
-# Tier thresholds — must match LoyaltyContext.js TIERS array
-def calc_tier(points: int) -> str:
-    if points >= 2000:
-        return "Gold"
-    elif points >= 500:
-        return "Silver"
-    return "Bronze"
-
-
 def build_promotional_items(items: list, is_member: bool) -> list:
     total_10ml = 0
     total_50ml = 0
@@ -121,7 +112,6 @@ async def create_user(user: dict):
     response = supabase.table("users").insert({
         "email": email,
         "loyalty_points": 0,
-        "tier": "Bronze"
     }).execute()
     return response.data[0]
 
@@ -129,7 +119,7 @@ async def create_user(user: dict):
 # FIX 2: Add loyalty fetch endpoint (used by LoyaltyContext.fetchLoyalty)
 @app.get("/users/loyalty")
 def get_loyalty(email: str):
-    user = supabase.table("users").select("loyalty_points, tier, created_at").eq("email", email).execute()
+    user = supabase.table("users").select("loyalty_points, created_at").eq("email", email).execute()
     if not user.data:
         raise HTTPException(status_code=404, detail="User not found")
     return user.data[0]
@@ -140,17 +130,15 @@ def get_loyalty(email: str):
 async def earn_loyalty(data: dict):
     email          = data.get("email")
     new_total      = data.get("new_total")
-    new_tier       = data.get("new_tier") or calc_tier(new_total)
 
     if not email:
         raise HTTPException(status_code=400, detail="Email is required")
 
     supabase.table("users").update({
         "loyalty_points": new_total,
-        "tier": new_tier
     }).eq("email", email).execute()
 
-    return {"loyalty_points": new_total, "tier": new_tier}
+    return {"loyalty_points": new_total}
 
 
 # -----------------------------
@@ -309,11 +297,9 @@ async def stripe_webhook(request: Request):
                 # FIX 9: 1 point per SGD (not per cent)
                 earned_points  = int(amount_sgd)
                 new_points     = current_points + earned_points
-                new_tier       = calc_tier(new_points)   # FIX 8
 
                 supabase.table("users").update({
                     "loyalty_points": new_points,
-                    "tier":           new_tier,
                 }).eq("email", email).execute()
             else:
                 # Auto-create user if they checked out as guest
@@ -321,7 +307,6 @@ async def stripe_webhook(request: Request):
                 supabase.table("users").insert({
                     "email":          email,
                     "loyalty_points": earned_points,
-                    "tier":           calc_tier(earned_points),
                 }).execute()
 
     return {"status": "success"}

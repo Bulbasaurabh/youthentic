@@ -180,12 +180,12 @@ const css = `
   .yt-modal-overlay {
     position: fixed; inset: 0; z-index: 500;
     background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 1.5rem; animation: modalOverlayIn 0.3s ease;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 6rem 1.5rem 1.5rem; animation: modalOverlayIn 0.3s ease;
   }
   .yt-modal {
     background: #0a0a0a; border: 1px solid rgba(201,168,76,0.25);
-    width: 100%; max-width: 900px; max-height: 90svh;
+    width: 100%; max-width: 900px; max-height: calc(100svh - 7.5rem);
     overflow-y: auto; position: relative;
     display: grid; grid-template-columns: 1fr 1fr;
     animation: modalIn 0.35s cubic-bezier(0.22,1,0.36,1);
@@ -394,7 +394,8 @@ const css = `
 
   /* ── RESPONSIVE ────────────────────────────────────────────────── */
   @media (max-width: 700px) {
-    .yt-modal { grid-template-columns: 1fr; max-height: 95svh; }
+    .yt-modal-overlay { padding-top: 4.75rem; }
+    .yt-modal { grid-template-columns: 1fr; max-height: calc(100svh - 5.75rem); }
     .yt-modal__img-panel { aspect-ratio: 4/3; }
     .yt-modal__panel { padding: 1.5rem; }
     .yt-modal__variant-toggle { align-self: stretch; }

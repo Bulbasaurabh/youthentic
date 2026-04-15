@@ -348,18 +348,6 @@ const css = `
   }
   .cart-empty__cta:hover { background: var(--gold2); transform: translateY(-2px); }
 
-  /* ── FOOTER ─────────────────────────────────────────────────────── */
-  .yt-footer {
-    background: var(--black); border-top: 1px solid var(--border);
-    padding: 2rem 3rem; display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 1rem; font-family: 'Jost', sans-serif;
-  }
-  .yt-footer__brand { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.2em; color: var(--gold); }
-  .yt-footer__links { display: flex; gap: 2rem; list-style: none; }
-  .yt-footer__links a { font-size: 0.72rem; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
-  .yt-footer__links a:hover { color: var(--gold); }
-  .yt-footer__copy { font-size: 0.72rem; color: rgba(136,136,136,0.5); }
-
   /* ── KEYFRAMES ──────────────────────────────────────────────────── */
   @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 
@@ -425,15 +413,7 @@ const Cart = () => {
               Browse the Collection →
             </Link>
           </div>
-          <footer className="yt-footer">
-            <span className="yt-footer__brand">YOUTHENTIC</span>
-            <ul className="yt-footer__links">
-              <li><Link to="/products">Shop</Link></li>
-              <li><Link to="/brand-story">About</Link></li>
-              <li><Link to="/loyalty">Rewards</Link></li>
-            </ul>
-            <span className="yt-footer__copy">© 2025 Youthentic Fragrances · Singapore</span>
-          </footer>
+          <Footer />
         </div>
       </>
     );

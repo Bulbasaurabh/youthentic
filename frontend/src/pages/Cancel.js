@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Footer from "../components/Footer";
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
@@ -156,6 +157,8 @@ const Cancel = () => (
           <Link to="/products" className="cn-btn-ghost">Browse Products</Link>
         </div>
       </div>
+
+      <Footer />
     </div>
   </>
 );

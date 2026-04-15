@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Footer from "../components/Footer";
 
 const css = `
@@ -286,18 +286,6 @@ const css = `
   }
   .yt-btn-yellow:hover { background: var(--gold2); transform: translateY(-2px); }
 
-  /* FOOTER */
-  .yt-footer {
-    background: var(--black); border-top: 1px solid var(--border);
-    padding: 2rem 3rem; display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 1rem; font-family: 'Jost', sans-serif;
-  }
-  .yt-footer__brand { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.2em; color: var(--gold); }
-  .yt-footer__links { display: flex; gap: 2rem; list-style: none; }
-  .yt-footer__links a { font-size: 0.72rem; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
-  .yt-footer__links a:hover { color: var(--gold); }
-  .yt-footer__copy { font-size: 0.72rem; color: rgba(136,136,136,0.5); }
-
   /* KEYFRAMES */
   @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
 
@@ -464,7 +452,7 @@ const FAQ = () => {
   const toggle = (i) => setOpenIndex((prev) => (prev === i ? null : i));
 
   return (
-    <section className="ab-faq">
+    <section id="faq" className="ab-faq">
       <div className="ab-faq__header">
         <p className="ab-faq__eyebrow">Got Questions?</p>
         <h2 className="ab-faq__title">FREQUENTLY<br /><span>ASKED.</span></h2>
@@ -501,7 +489,19 @@ const FAQ = () => {
 
 const BrandStory = () => {
   const [openPillar, setOpenPillar] = useState(null);
+  const location = useLocation();
   useReveal();
+
+  useEffect(() => {
+    if (location.hash === "#faq") {
+      setTimeout(() => {
+        const faqElement = document.getElementById("faq");
+        if (faqElement) {
+          faqElement.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
 
   const togglePillar = (i) => setOpenPillar((prev) => (prev === i ? null : i));
 
@@ -581,7 +581,7 @@ const BrandStory = () => {
           </p>
           <div className="ab-split__stat">
             <div>
-              <div className="ab-split__stat-num">12+</div>
+              <div className="ab-split__stat-num">8+</div>
               <div className="ab-split__stat-label">Signature Scents</div>
             </div>
             <div>

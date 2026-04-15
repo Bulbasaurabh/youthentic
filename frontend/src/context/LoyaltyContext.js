@@ -56,7 +56,7 @@ export const TIERS = [
       "2x 1.5ml free sample with every 50ml purchase",
       "50 points per referral with purchase",
       "Priority early sales access to new releases",
-      "Free express shipping on all orders",
+      "Free shipping on all orders",
       "1x free 10ml for each product launch",
       "10% exclusive discount on all orders",
     ],
@@ -84,12 +84,11 @@ export const getNextTier     = (pts)  => {
 export const LoyaltyProvider = ({ children }) => {
   const [points,  setPoints]  = useState(0);
   const [email,   setEmail]   = useState(null);
-  const [tierOverride, setTierOverride] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // Prefer backend tier when present; fall back to points-derived tier.
   const tierFromPoints = getTierByPoints(points);
-  const tierData = tierOverride ? getTierByName(tierOverride) : tierFromPoints;
+  const tierData = tierFromPoints;
   const nextTier = getNextTier(points);
   const tier     = tierData.name; // string, matches DB column
 
@@ -101,10 +100,8 @@ export const LoyaltyProvider = ({ children }) => {
     try {
       const res = await API.get(`/users/loyalty?email=${encodeURIComponent(userEmail)}`);
       setPoints(res.data.loyalty_points ?? 0);
-      setTierOverride(normalizeTierName(res.data.tier));
     } catch (e) {
       console.error("Loyalty fetch failed", e);
-      setTierOverride(null);
     } finally {
       setLoading(false);
     }
@@ -124,7 +121,6 @@ export const LoyaltyProvider = ({ children }) => {
 
     // Derive new tier from new total
     const newTierName = getTierByPoints(newTotal).name;
-    setTierOverride(newTierName);
 
     if (email) {
       try {
@@ -137,7 +133,6 @@ export const LoyaltyProvider = ({ children }) => {
       } catch (e) {
         console.error("Loyalty earn failed", e);
         setPoints(points); // rollback on error
-        setTierOverride(normalizeTierName(tier));
       }
     }
 
@@ -150,7 +145,6 @@ export const LoyaltyProvider = ({ children }) => {
     const newTotal = points - pointsToRedeem;
     const newTierName = getTierByPoints(newTotal).name;
     setPoints(newTotal);
-    setTierOverride(newTierName);
 
     if (email) {
       try {
@@ -163,7 +157,6 @@ export const LoyaltyProvider = ({ children }) => {
       } catch (e) {
         console.error("Loyalty redeem failed", e);
         setPoints(points); // rollback
-        setTierOverride(normalizeTierName(tier));
         return false;
       }
     }

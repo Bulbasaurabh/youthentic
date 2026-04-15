@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
+
+const assetUrl = (fileName) => `${process.env.PUBLIC_URL || ""}/assets/${encodeURIComponent(fileName)}`;
 
 /* ─── INJECT GLOBAL STYLES ─────────────────────────────────────── */
 const css = `
@@ -687,72 +689,81 @@ const css = `
   /* orbital ring visual */
   .yt-loyalty__visual {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
     position: relative;
     height: 380px;
+    gap: 1.5rem;
   }
 
-  .yt-loyalty__ring-outer {
-    width: 280px;
-    height: 280px;
-    border-radius: 50%;
-    border: 1px solid rgba(201,168,76,0.15);
+  .yt-loyalty__podium {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+    gap: 1.5rem;
     justify-content: center;
-    animation: spin 20s linear infinite;
-    position: relative;
   }
 
-  .yt-loyalty__ring-inner {
-    width: 190px;
-    height: 190px;
-    border-radius: 50%;
-    border: 1px solid rgba(201,168,76,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: spin 12s linear infinite reverse;
-    position: relative;
-  }
-
-  .yt-loyalty__ring-core {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
-    border: 1px solid var(--gold);
+  .yt-loyalty__tier-col {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.2rem;
-    animation: none;
+    justify-content: flex-end;
+    background: linear-gradient(to top, rgba(201,168,76,0.08), transparent);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2rem 2.5rem;
+    min-width: 100px;
+    transition: all 0.3s ease;
+    position: relative;
   }
 
-  .yt-loyalty__pts-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    color: var(--gold);
-    line-height: 1;
-    letter-spacing: 0.05em;
-  }
-  .yt-loyalty__pts-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
+  .yt-loyalty__tier-col:hover {
+    background: linear-gradient(to top, rgba(201,168,76,0.15), rgba(201,168,76,0.05));
+    border-color: rgba(201,168,76,0.3);
   }
 
-  /* orbit dot */
-  .yt-orbit-dot {
-    position: absolute;
-    width: 8px; height: 8px;
+  .yt-loyalty__tier-col--active {
+    background: linear-gradient(to top, rgba(201,168,76,0.2), rgba(201,168,76,0.08));
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(201,168,76,0.2);
+    transform: scale(1.05);
+  }
+
+  .yt-loyalty__tier-col--active:hover {
+    background: linear-gradient(to top, rgba(201,168,76,0.25), rgba(201,168,76,0.12));
+  }
+
+  .yt-loyalty__tier-col-dot {
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: var(--gold);
-    top: -4px;
-    left: calc(50% - 4px);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .yt-loyalty__tier-col-dot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .yt-loyalty__tier-col-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .yt-loyalty__tier-col-pts {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    line-height: 1;
   }
 
   /* ─── FOOTER STRIP ────────────────────────────────────────────── */
@@ -835,10 +846,11 @@ const css = `
     .yt-scents__header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
     .yt-delivery { grid-template-columns: 1fr; padding: 4rem 1.5rem; gap: 2.5rem; }
     .yt-loyalty { grid-template-columns: 1fr; padding: 4rem 1.5rem; gap: 3rem; }
-    .yt-loyalty__visual { height: 260px; }
-    .yt-loyalty__ring-outer { width: 200px; height: 200px; }
-    .yt-loyalty__ring-inner { width: 135px; height: 135px; }
-    .yt-loyalty__ring-core { width: 80px; height: 80px; }
+    .yt-loyalty__visual { height: auto; }
+    .yt-loyalty__podium { gap: 1rem; }
+    .yt-loyalty__tier-col { padding: 1.5rem 1.5rem; min-width: 80px; }
+    .yt-loyalty__tier-col-label { font-size: 0.8rem; }
+    .yt-loyalty__tier-col-pts { font-size: 0.95rem; }
     .yt-footer { flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; }
   }
 `;
@@ -880,13 +892,11 @@ const MARQUEE_ITEMS = [
   "YOUTHENTIC LITE",
   "LONG-LASTING FORMULA",
   "POCKET-SIZED LUXURY",
-  "FREE SG DELIVERY",
   "FORMULATED IN BARCELONA",
   "REFINED FOR SINGAPORE",
   "YOUTHENTIC LITE",
   "LONG-LASTING FORMULA",
   "POCKET-SIZED LUXURY",
-  "FREE SG DELIVERY",
 ];
 
 /* ─── BOTTLE SVG ────────────────────────────────────────────────── */
@@ -946,11 +956,18 @@ const PedestalSVG = () => (
   </svg>
 );
 
+const TIER_ICONS = {
+  Bronze: assetUrl("Bronze.png"),
+  Silver: assetUrl("Silver.png"),
+  Gold: assetUrl("Gold.png"),
+};
+
 /* ─── HOME COMPONENT ────────────────────────────────────────────── */
 const Home = () => {
   const [addedIds, setAddedIds] = useState([]);
   const [scrolled, setScrolled] = useState(false);
   const scentsRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -964,7 +981,7 @@ const Home = () => {
     setTimeout(() => setAddedIds((prev) => prev.filter((id) => id !== scent.id)), 1800);
   };
 
-  const scrollToScents = () => scentsRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToScents = () => navigate("/products");
 
   return (
     <>
@@ -1007,8 +1024,7 @@ const Home = () => {
         {/* bottom bar */}
         <div className="yt-hero__bottom">
           <div className="yt-hero__tagline">
-            <p>Crafted in Indonesia</p>
-            <strong>Refined for Singapore.</strong>
+            <p>Crafted in Indonesia — Refined for Singapore.</p>
           </div>
           <div className="yt-hero__actions">
             <button className="yt-btn-yellow" onClick={scrollToScents}>
@@ -1019,10 +1035,7 @@ const Home = () => {
         </div>
 
         {/* scroll caret */}
-        <div className="yt-hero__scroll" onClick={scrollToScents} role="button" aria-label="Scroll down">
-          <span>Scroll</span>
-          <div className="yt-scroll-caret" />
-        </div>
+        
       </section>
 
       {/* ── MARQUEE ───────────────────────────────────────────────── */}
@@ -1052,7 +1065,7 @@ const Home = () => {
           <Link to="/products" className="yt-btn-yellow">Shop All Scents</Link>
           <div className="yt-about__stats">
             <div>
-              <div className="yt-about__stat-num">12+</div>
+              <div className="yt-about__stat-num">8+</div>
               <div className="yt-about__stat-label">Signature Scents</div>
             </div>
             <div>
@@ -1068,10 +1081,10 @@ const Home = () => {
 
         <div className="yt-about__right">
           {[
-            { icon: "🌿", title: "Natural Ingredients", text: "Sourced from Indonesia's finest botanical regions." },
-            { icon: "✈️", title: "Travel-Ready", text: "Compact 10ml pens fit any bag, pocket, or carry-on." },
+            { icon: "🌿", title: "Natural Ingredients", text: "High-quality ingredients carefully selected from Barcelona to create the perfect scent." },
+            { icon: "✈️", title: "Travel-Ready", text: "Compact 10ml size fits any bag, pocket, or carry-on." },
             { icon: "💧", title: "Long-Lasting", text: "Premium formula designed for Singapore's humid climate." },
-            { icon: "🇸🇬", title: "SG Express", text: "Same-week delivery islandwide. No minimums." },
+            { icon: "🇸🇬", title: "SG Delivery", text: "Same-week delivery islandwide." },
           ].map((p) => (
             <div key={p.title} className="yt-about__pillar">
               <div className="yt-about__pillar-icon">{p.icon}</div>
@@ -1082,50 +1095,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── FEATURED SCENTS ───────────────────────────────────────── */}
-      {/* <section className="yt-scents" ref={scentsRef}>
-        <div className="yt-scents__header">
-          <div>
-            <p style={{ fontSize: "0.68rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "0.75rem" }}>
-              Featured Collection
-            </p>
-            <h2 className="yt-scents__title">
-              PICK YOUR<br /><span>SCENT.</span>
-            </h2>
-          </div>
-          <Link to="/products" className="yt-btn-ghost" style={{ marginBottom: "0.5rem" }}>
-            View All →
-          </Link>
-        </div>
-
-        <div className="yt-scents__grid">
-          {SCENTS.map((s) => (
-            <div key={s.id} className="yt-scent-card">
-              <span className="yt-scent-card__tag">{s.tag}</span>
-              <h3 className="yt-scent-card__name">{s.name}</h3>
-              <p className="yt-scent-card__notes">{s.notes}</p>
-              <p style={{ fontSize: "0.78rem", color: "rgba(136,136,136,0.7)", lineHeight: 1.6 }}>{s.desc}</p>
-              <div className="yt-scent-card__footer">
-                <span className="yt-scent-card__price">{s.price}</span>
-                {addedIds.includes(s.id) ? (
-                  <span className="yt-scent-card__added" style={{ fontSize: "0.7rem", letterSpacing: "0.1em", color: "var(--gold)" }}>
-                    ✓ Added
-                  </span>
-                ) : (
-                  <button
-                    className="yt-scent-card__add"
-                    onClick={() => handleAddToCart(s)}
-                    aria-label={`Add ${s.name} to cart`}
-                  >
-                    +
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section> */}
-
       {/* ── SG DELIVERY ───────────────────────────────────────────── */}
       <section className="yt-delivery">
         <div>
@@ -1135,10 +1104,10 @@ const Home = () => {
           </h2>
           <div className="yt-delivery__perks">
             {[
-              { icon: "🚚", text: "Free delivery on all orders" },
-              { icon: "⚡", text: "Same-week dispatch guaranteed" },
-              { icon: "📦", text: "Discreet, elegant packaging" },
-              { icon: "↩️", text: "Easy 14-day returns" },
+              { icon: "🚚", text: "Free delivery on orders above SGD 50" },
+              { icon: "⚡", text: "3-5 Business days" },
+              { icon: "📦", text: "Secure, elegant packaging" },
+              { icon: "↩️", text: "7-day returns if damaged" },
             ].map((p) => (
               <div key={p.text} className="yt-delivery__perk">
                 <span className="yt-delivery__perk-icon">{p.icon}</span>
@@ -1170,19 +1139,19 @@ const Home = () => {
       {/* ── LOYALTY ───────────────────────────────────────────────── */}
       <section className="yt-loyalty">
         <div className="yt-loyalty__content">
-          <p className="yt-loyalty__label">Rewards Programme</p>
+          <p className="yt-loyalty__label">Loyalty Programme</p>
           <h2 className="yt-loyalty__title">
             Earn points.<br />Smell better.
           </h2>
           <p className="yt-loyalty__body">
-            Every SGD spent earns you Youthentic points. Redeem them for free bottles,
+            Every SGD spent earns you Youthentic points. Upgrade tiers for free bottles,
             exclusive drops, and early access to limited editions.
           </p>
           <div className="yt-loyalty__tiers">
             {[
-              { dot: "yt-tier-bronze", name: "Bronze", pts: "0 – 299 pts", benefit: "Free Sample w/ every purchase" },
-              { dot: "yt-tier-silver", name: "Silver", pts: "300 – 799 pts", benefit: "Early Access to latest fragrances" },
-              { dot: "yt-tier-gold",   name: "Gold",   pts: "800+ pts",     benefit: "Free Express Delivery" },
+              { dot: "yt-tier-bronze", name: "Bronze", pts: "0 – 119 pts", benefit: "Free Sample w/ every purchase" },
+              { dot: "yt-tier-silver", name: "Silver", pts: "120 – 499 pts", benefit: "Early Sales Access to new releases" },
+              { dot: "yt-tier-gold",   name: "Gold",   pts: "500+ pts",     benefit: "10% Exclusive Discount on all orders" },
             ].map((t) => (
               <div key={t.name} className="yt-loyalty__tier">
                 <div className={`yt-loyalty__tier-dot ${t.dot}`} />
@@ -1199,16 +1168,32 @@ const Home = () => {
           </Link>
         </div>
 
-        {/* orbital visual */}
+        {/* tier progression visual */}
         <div className="yt-loyalty__visual">
-          <div className="yt-loyalty__ring-outer">
-            <div className="yt-orbit-dot" />
-            <div className="yt-loyalty__ring-inner">
-              <div className="yt-orbit-dot" style={{ background: "var(--gold2)" }} />
-              <div className="yt-loyalty__ring-core">
-                <div className="yt-loyalty__pts-num">500</div>
-                <div className="yt-loyalty__pts-label">Gold Tier</div>
+          <div className="yt-loyalty__podium">
+            {/* Bronze */}
+            <div className="yt-loyalty__tier-col" style={{ height: "160px" }}>
+              <div className="yt-loyalty__tier-col-dot">
+                <img src={TIER_ICONS.Bronze} alt="Bronze" />
               </div>
+              <div className="yt-loyalty__tier-col-label">Bronze</div>
+              <div className="yt-loyalty__tier-col-pts">0–119</div>
+            </div>
+            {/* Silver */}
+            <div className="yt-loyalty__tier-col" style={{ height: "220px" }}>
+              <div className="yt-loyalty__tier-col-dot">
+                <img src={TIER_ICONS.Silver} alt="Silver" />
+              </div>
+              <div className="yt-loyalty__tier-col-label">Silver</div>
+              <div className="yt-loyalty__tier-col-pts">120–499</div>
+            </div>
+            {/* Gold (highlighted) */}
+            <div className="yt-loyalty__tier-col yt-loyalty__tier-col--active" style={{ height: "280px" }}>
+              <div className="yt-loyalty__tier-col-dot">
+                <img src={TIER_ICONS.Gold} alt="Gold" />
+              </div>
+              <div className="yt-loyalty__tier-col-label">Gold</div>
+              <div className="yt-loyalty__tier-col-pts">500+</div>
             </div>
           </div>
         </div>
