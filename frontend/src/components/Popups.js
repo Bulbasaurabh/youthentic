@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+const assetUrl = (fileName) => `${process.env.PUBLIC_URL || ""}/assets/${encodeURIComponent(fileName)}`;
+
 const css = `
   /* ── SHARED OVERLAY ─────────────────────────────────────────────── */
   .yt-popup-overlay {
@@ -100,7 +102,14 @@ const css = `
     background: #0d0d0d; padding: 1.25rem 1rem; text-align: center;
     display: flex; flex-direction: column; gap: 0.4rem;
   }
-  .yt-member-popup__tier-icon { font-size: 1.3rem; }
+  .yt-member-popup__tier-icon {
+    width: 2.6rem; height: 2.6rem; margin: 0 auto 0.1rem;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .yt-member-popup__tier-icon img {
+    width: 100%; height: 100%; object-fit: contain; display: block;
+    filter: drop-shadow(0 0 10px rgba(201,168,76,0.18));
+  }
   .yt-member-popup__tier-name {
     font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
     letter-spacing: 0.1em;
@@ -214,12 +223,14 @@ const MemberPopup = ({ onDismiss }) => {
 
         <div className="yt-member-popup__tiers">
           {[
-            { icon: "🥉", name: "Bronze", pts: "0 pts",    color: "#cd7f32", perk: "1× points on every purchase" },
-            { icon: "🥈", name: "Silver", pts: "500 pts",  color: "#a8a9ad", perk: "1.5× points + early access" },
-            { icon: "🏆", name: "Gold",   pts: "2000 pts", color: "#C9A84C", perk: "2× points + 10% discount" },
+            { icon: "Bronze.png", name: "Bronze", pts: "0 pts",    color: "#cd7f32", perk: "Free sample with 50ml purchase" },
+            { icon: "Silver.png", name: "Silver", pts: "120 pts",  color: "#a8a9ad", perk: "1.5× points + early access" },
+            { icon: "Gold.png",   name: "Gold",   pts: "500 pts", color: "#C9A84C", perk: "2× points + 10% discount" },
           ].map((t) => (
             <div key={t.name} className="yt-member-popup__tier">
-              <span className="yt-member-popup__tier-icon">{t.icon}</span>
+              <span className="yt-member-popup__tier-icon" aria-hidden="true">
+                <img src={assetUrl(t.icon)} alt="" />
+              </span>
               <span className="yt-member-popup__tier-name" style={{ color: t.color }}>{t.name}</span>
               <span className="yt-member-popup__tier-pts">{t.pts}</span>
               <p className="yt-member-popup__tier-perk">{t.perk}</p>

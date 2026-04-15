@@ -3,6 +3,13 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import { getRenewalStatus } from "../utils/loyaltyRenewal";
 
+const assetUrl = (fileName) => `${process.env.PUBLIC_URL || ""}/assets/${encodeURIComponent(fileName)}`;
+const TIER_ICONS = {
+  bronze: assetUrl("Bronze.png"),
+  silver: assetUrl("Silver.png"),
+  gold: assetUrl("Gold.png"),
+};
+
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 
@@ -156,7 +163,14 @@ const css = `
     font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
     display: flex; align-items: center; gap: 0.5rem;
   }
-  .ord-renewal__title::before { content: '✦'; font-size: 0.5rem; }
+  .ord-renewal__title-icon {
+    width: 1rem; height: 1rem; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .ord-renewal__title-icon img,
+  .ord-renewal__bronze-icon img {
+    width: 100%; height: 100%; object-fit: contain; display: block;
+  }
   .ord-renewal__expiry {
     font-size: 0.7rem; color: var(--muted);
   }
@@ -190,7 +204,10 @@ const css = `
     padding: 1rem 1.5rem; font-size: 0.75rem; color: var(--muted); line-height: 1.6;
     display: flex; align-items: center; gap: 0.6rem;
   }
-  .ord-renewal__bronze::before { content: '🥉'; font-size: 1rem; }
+  .ord-renewal__bronze-icon {
+    width: 1.1rem; height: 1.1rem; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
 
 
   @keyframes ordSlideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -215,6 +232,7 @@ const statusClass = (s) => {
   return `ord-status ord-status--${map[s.toLowerCase()] ?? "unknown"}`;
 };
 const statusLabel = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "Unknown";
+const getTierIcon = (tier) => TIER_ICONS[String(tier ?? "").toLowerCase()] ?? TIER_ICONS.bronze;
 
 const getEarliestOrderDate = (orders) => {
   const timestamps = (Array.isArray(orders) ? orders : [])
@@ -341,7 +359,12 @@ const Orders = () => {
               {renewal ? (
                 <>
                   <div className="ord-renewal__header">
-                    <span className="ord-renewal__title">{displayTier} Membership Renewal</span>
+                    <span className="ord-renewal__title">
+                      <span className="ord-renewal__title-icon" aria-hidden="true">
+                        <img src={getTierIcon(displayTier)} alt="" />
+                      </span>
+                      {displayTier} Membership Renewal
+                    </span>
                     <span className="ord-renewal__expiry">
                       Renewal due <strong>{renewal.expiryDateStr}</strong> · {renewal.daysLeft} days left
                     </span>
@@ -379,6 +402,9 @@ const Orders = () => {
                 </>
               ) : (
                 <div className="ord-renewal__bronze">
+                  <span className="ord-renewal__bronze-icon" aria-hidden="true">
+                    <img src={getTierIcon("Bronze")} alt="" />
+                  </span>
                   {String(tier ?? "").toLowerCase() === "bronze"
                     ? "You're on Bronze - no renewal required. Spend to earn points and unlock Silver or Gold."
                     : "Renewal status is unavailable right now. Please try again in a moment."

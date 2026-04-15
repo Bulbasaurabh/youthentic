@@ -4,6 +4,8 @@ import { useLoyalty, TIERS, getTierByPoints } from "../context/LoyaltyContext";
 import { getRenewalStatus, RENEWAL_RULES } from "../utils/loyaltyRenewal";
 import API from "../api/api";
 
+const assetUrl = (fileName) => `${process.env.PUBLIC_URL || ""}/assets/${encodeURIComponent(fileName)}`;
+
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 
@@ -63,7 +65,11 @@ const css = `
   .ly-hero__sub {
     position: relative; z-index: 1;
     font-family: 'Cormorant Garamond', serif; font-size: clamp(1rem, 1.5vw, 1.15rem);
-    font-weight: 300; font-style: italic; color: var(--muted); max-width: 48ch; line-height: 1.8;
+    font-weight: 400; font-style: italic; color: rgba(255,255,255,0.9); max-width: 52ch; line-height: 1.85;
+    padding: 0.8rem 1.1rem;
+    background: rgba(0,0,0,0.42);
+    border: 1px solid rgba(201,168,76,0.2);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.55);
     animation: fadeUp 0.8s ease forwards 0.45s; opacity: 0;
   }
 
@@ -94,8 +100,14 @@ const css = `
     font-size: clamp(3rem, 6vw, 5rem); letter-spacing: 0.06em; line-height: 1;
   }
   .ly-tier-icon {
-    font-size: 2.5rem;
+    width: 3rem; height: 3rem;
+    display: inline-flex; align-items: center; justify-content: center;
     filter: drop-shadow(0 0 12px var(--tier-glow, transparent));
+  }
+  .ly-tier-icon img,
+  .ly-tier-card__icon img,
+  .ly-renewal__rule-icon img {
+    width: 100%; height: 100%; object-fit: contain; display: block;
   }
 
   /* points display */
@@ -188,7 +200,11 @@ const css = `
   }
 
   .ly-tier-card__head { display: flex; align-items: center; gap: 1rem; }
-  .ly-tier-card__icon { font-size: 1.8rem; }
+  .ly-tier-card__icon {
+    width: 2.4rem; height: 2.4rem; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    filter: drop-shadow(0 0 10px var(--tier-glow, transparent));
+  }
   .ly-tier-card__name {
     font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
     letter-spacing: 0.06em; line-height: 1;
@@ -210,7 +226,7 @@ const css = `
     font-size: 0.8rem; color: var(--muted); line-height: 1.5;
   }
   .ly-tier-card__benefit::before {
-    content: '✓'; font-size: 0.65rem; flex-shrink: 0; margin-top: 0.15rem;
+    content: ''; font-size: 0.65rem; flex-shrink: 0; margin-top: 0.15rem;
   }
 
   /* ── HOW IT WORKS ───────────────────────────────────────────────── */
@@ -315,7 +331,11 @@ const css = `
   }
   .ly-renewal__rule:hover { background: var(--panel); }
   .ly-renewal__rule-head { display: flex; align-items: center; gap: 1rem; }
-  .ly-renewal__rule-icon { font-size: 1.5rem; }
+  .ly-renewal__rule-icon {
+    width: 2.2rem; height: 2.2rem; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    filter: drop-shadow(0 0 10px var(--tier-glow, transparent));
+  }
   .ly-renewal__rule-tier {
     font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.08em;
   }
@@ -408,7 +428,11 @@ const css = `
   }
 `;
 
-const TIER_ICONS = { Bronze: "🥉", Silver: "🥈", Gold: "🏆" };
+const TIER_ICONS = {
+  Bronze: assetUrl("Bronze.png"),
+  Silver: assetUrl("Silver.png"),
+  Gold: assetUrl("Gold.png"),
+};
 
 const Loyalty = () => {
   const { points, tier, tierData, nextTier, TIERS, email } = useLoyalty();
@@ -468,7 +492,9 @@ const Loyalty = () => {
                 className="ly-tier-icon"
                 style={{ "--tier-glow": tierData.borderColor }}
               >
-                {TIER_ICONS[tier] ?? "✦"}
+                {TIER_ICONS[tier]
+                  ? <img src={TIER_ICONS[tier]} alt="" aria-hidden="true" />
+                  : "✦"}
               </span>
             </div>
 
@@ -536,7 +562,9 @@ const Loyalty = () => {
                   </span>
 
                   <div className="ly-tier-card__head">
-                    <span className="ly-tier-card__icon">{TIER_ICONS[t.name]}</span>
+                    <span className="ly-tier-card__icon" style={{ "--tier-glow": t.borderColor }} aria-hidden="true">
+                      <img src={TIER_ICONS[t.name]} alt="" />
+                    </span>
                     <span className="ly-tier-card__name" style={{ color: t.color }}>
                       {t.name}
                     </span>
@@ -676,21 +704,23 @@ const Loyalty = () => {
           <div className="ly-renewal__rules">
             {[
               {
-                icon: "🥈", tier: "Silver", color: "#a8a9ad",
-                req: "SGD 119", period: "Every 2 years",
-                desc: "Spend SGD 119 or more within your 2-year window to keep Silver status and your accumulated points.",
+                icon: TIER_ICONS.Silver, tier: "Silver", color: "#a8a9ad",
+                req: "119 Points", period: "Every 2 years",
+                desc: "Accumulate 119 points or more within your 2-year window to keep Silver status and your accumulated points.",
                 fail: "Drops to Bronze · All points reset to 0",
               },
               {
-                icon: "🏆", tier: "Gold", color: "#C9A84C",
-                req: "SGD 250", period: "Every 2 years",
-                desc: "Spend SGD 250 or more within your 2-year window to maintain Gold status and full benefits.",
+                icon: TIER_ICONS.Gold, tier: "Gold", color: "#C9A84C",
+                req: "500 Points", period: "Every 2 years",
+                desc: "Accumulate 500 points within your 2-year window to maintain Gold status and full benefits.",
                 fail: "Drops to Silver · Points adjusted to 120",
               },
             ].map((r) => (
               <div key={r.tier} className="ly-renewal__rule">
                 <div className="ly-renewal__rule-head">
-                  <span className="ly-renewal__rule-icon">{r.icon}</span>
+                  <span className="ly-renewal__rule-icon" aria-hidden="true">
+                    <img src={r.icon} alt="" />
+                  </span>
                   <span className="ly-renewal__rule-tier" style={{ color: r.color }}>{r.tier}</span>
                 </div>
                 <div className="ly-renewal__rule-body">
