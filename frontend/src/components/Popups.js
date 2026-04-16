@@ -211,7 +211,7 @@ const MemberPopup = ({ onDismiss }) => {
 
         <div className="yt-member-popup__header">
           <span className="yt-member-popup__crown">✦</span>
-          <p className="yt-member-popup__eyebrow">Youthentic Rewards</p>
+          <p className="yt-member-popup__eyebrow">Youthentic Loyalty</p>
           <h2 className="yt-member-popup__title">
             FREE STRIPS<br /><span>WITH SIGNUP.</span>
           </h2>

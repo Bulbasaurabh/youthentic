@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import API from "../api/api";
 import Footer from "../components/Footer";
 
 const css = `
@@ -146,12 +147,23 @@ const css = `
 `;
 
 const Success = () => {
-  const { cart, clearCart } = useCart();
+  const { clearCart } = useCart();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     // Clear cart after successful payment
     if (clearCart) clearCart();
   }, []);
+
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    if (!sessionId) return;
+
+    API.post("/checkout/confirm", { session_id: sessionId })
+      .catch((err) => {
+        console.error("Checkout confirmation failed", err?.response?.data || err);
+      });
+  }, [searchParams]);
 
   return (
     <>

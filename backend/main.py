@@ -79,6 +79,79 @@ def build_promotional_items(items: list, is_member: bool) -> list:
     return promo_items
 
 
+def persist_checkout_session(session_id: str):
+    full_session = stripe.checkout.Session.retrieve(
+        session_id,
+        expand=["line_items"]
+    )
+
+    payment_status = full_session.get("payment_status")
+    status = full_session.get("status")
+    if payment_status != "paid" and status != "complete":
+        raise HTTPException(status_code=409, detail="Checkout session is not paid yet")
+
+    existing_order = (
+        supabase
+        .table("orders")
+        .select("*")
+        .eq("stripe_session_id", full_session["id"])
+        .limit(1)
+        .execute()
+    )
+    if existing_order.data:
+        return {
+            "order": existing_order.data[0],
+            "already_saved": True,
+            "email": existing_order.data[0].get("email"),
+        }
+
+    email = (
+        full_session.get("customer_details", {}).get("email")
+        or full_session.get("customer_email")
+    )
+    if not email:
+        raise HTTPException(status_code=400, detail="No customer email found on checkout session")
+
+    amount_cents = int(full_session.get("amount_total", 0) or 0)
+    amount_sgd = amount_cents / 100
+    delivery_option = full_session.get("metadata", {}).get("delivery_option", "self")
+
+    try:
+        items = json.loads(full_session.get("metadata", {}).get("items", "[]"))
+    except Exception:
+        items = []
+
+    order_result = supabase.table("orders").insert({
+        "email": email,
+        "items": json.dumps(items),
+        "total_amount": int(amount_sgd),
+        "delivery_option": delivery_option,
+        "stripe_session_id": full_session["id"],
+        "payment_status": "paid",
+    }).execute()
+
+    user = supabase.table("users").select("*").eq("email", email).execute()
+    earned_points = int(amount_sgd)  # 1 point per SGD spent
+
+    if user.data:
+        current_points = user.data[0]["loyalty_points"] or 0
+        new_points = current_points + earned_points
+        supabase.table("users").update({
+            "loyalty_points": new_points,
+        }).eq("email", email).execute()
+    else:
+        supabase.table("users").insert({
+            "email": email,
+            "loyalty_points": earned_points,
+        }).execute()
+
+    return {
+        "order": (order_result.data or [None])[0],
+        "already_saved": False,
+        "email": email,
+    }
+
+
 # -----------------------------
 # ROOT
 # -----------------------------
@@ -257,59 +330,23 @@ async def stripe_webhook(request: Request):
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-
-        # FIX 6: retrieve full session to get customer email reliably
-        full_session = stripe.checkout.Session.retrieve(
-            session["id"],
-            expand=["line_items"]
-        )
-
-        email           = full_session.get("customer_details", {}).get("email")
-        amount_cents    = full_session.get("amount_total", 0)      # cents
-        amount_sgd      = amount_cents / 100                        # dollars
-        delivery_option = full_session["metadata"].get("delivery_option", "self")
-
-        # FIX 7: parse items from metadata
-        try:
-            items = json.loads(full_session["metadata"].get("items", "[]"))
-        except Exception:
-            items = []
-
-        # Save order
-        # total_amount stored as integer cents to match schema (integer column)
-        # items serialised to JSON string for jsonb column
-        order_result = supabase.table("orders").insert({
-            "email":             email,
-            "items":             json.dumps(items),   # jsonb needs a string
-            "total_amount":      int(amount_cents),   # integer column — store cents
-            "delivery_option":   delivery_option,
-            "stripe_session_id": full_session["id"],
-            "payment_status":    "paid",
-        }).execute()
-        print(f"Order saved: {order_result.data}")
-
-        # Update loyalty
-        if email:
-            user = supabase.table("users").select("*").eq("email", email).execute()
-
-            if user.data:
-                current_points = user.data[0]["loyalty_points"] or 0
-                # FIX 9: 1 point per SGD (not per cent)
-                earned_points  = int(amount_sgd)
-                new_points     = current_points + earned_points
-
-                supabase.table("users").update({
-                    "loyalty_points": new_points,
-                }).eq("email", email).execute()
-            else:
-                # Auto-create user if they checked out as guest
-                earned_points = int(amount_sgd)
-                supabase.table("users").insert({
-                    "email":          email,
-                    "loyalty_points": earned_points,
-                }).execute()
+        persist_checkout_session(session["id"])
 
     return {"status": "success"}
+
+
+@app.post("/checkout/confirm")
+async def confirm_checkout(data: dict):
+    session_id = data.get("session_id")
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id is required")
+
+    result = persist_checkout_session(session_id)
+    return {
+        "status": "ok",
+        "already_saved": result["already_saved"],
+        "email": result["email"],
+    }
 
 
 # -----------------------------

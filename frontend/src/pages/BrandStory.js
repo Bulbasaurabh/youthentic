@@ -419,7 +419,7 @@ const FAQ_DATA = {
   Shipping: [
     { q: "How long does delivery take in Singapore?", a: "Standard islandwide delivery takes 3–5 business days. Self-collection is also available and is typically ready within 1–2 business days. You'll receive an email with details once your order is confirmed." },
     { q: "Are there any duties or hidden fees?", a: "No hidden fees. All prices are displayed in SGD and include GST. There are no additional duties for Singapore orders — what you see at checkout is what you pay." },
-    { q: "What are the shipping costs?", a: "Home delivery is a flat SGD 5.00. Orders with self-collection are free. We may offer free delivery promotions from time to time — check our homepage for the latest." },
+    { q: "What are the shipping costs?", a: "Home delivery is a flat SGD 5.00. Orders above SGD 50 are eligible for free delivery, and Silver and Gold Tier members enjoy free shipping on all orders. We may offer free delivery promotions from time to time — check our homepage for the latest." },
     { q: "Can I change my delivery address after ordering?", a: "Please contact us as soon as possible if you need to change your address. We can update it if your order hasn't been dispatched yet." },
     { q: "How do you ensure products are protected and won’t get damaged during delivery?", a: "All orders are packed securely with protective materials and shipped in sturdy packaging to help prevent damage during delivery." },
   ],
@@ -430,7 +430,7 @@ const FAQ_DATA = {
     { q: "Is the fragrance suitable for sensitive skin?", a: "Our formulas are designed to be gentle, but we recommend patch testing on a small area if you have sensitive skin. Avoid direct contact with eyes." },
   ],
   Loyalty: [
-    { q: "How does the Youthentic Rewards program work?", a: "Every SGD you spend earns 1 loyalty point. Points accumulate toward tiers — Bronze (0–119 pts), Silver (120–499 pts), and Gold (500+ pts). Higher tiers unlock better multipliers and exclusive benefits." },
+    { q: "How does the Youthentic Loyalty program work?", a: "Every SGD you spend earns 1 loyalty point. Points accumulate toward tiers — Bronze (0–119 pts), Silver (120–499 pts), and Gold (500+ pts). Higher tiers unlock better multipliers and exclusive benefits." },
     { q: "What are the different loyalty benefits?", a: "Visit the Loyalty page on our website for a detailed breakdown, but in general: Bronze members earn 1 point per SGD, Silver members earn 1.5 points per SGD and get early access to new releases, and Gold members earn 2 points per SGD plus free shipping on all orders." },
     { q: "Do my points expire?", a: "Points do not expire as long as you make the minimum required purchases within a 24-month period." },
     { q: "How do I check my points balance?", a: "Visit the Orders page on our website after completing a purchase. Your points and current tier are displayed on your profile." },
