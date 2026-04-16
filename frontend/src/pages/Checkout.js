@@ -350,10 +350,7 @@ const css = `
 `;
 
 /* ── IMAGE LOADER ─────────────────────────────────────────────────── */
-const getImage = (name) => {
-  try { return require(`../assets/${name}.png`); }
-  catch { return null; }
-};
+const getImage = (name) => `/assets/${name}.png`;
 
 /* ── CHECKOUT ─────────────────────────────────────────────────────── */
 const Checkout = () => {

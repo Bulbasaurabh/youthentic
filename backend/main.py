@@ -38,6 +38,17 @@ FREE_SLEEVE_OPTIONS = [
     "Plain Sleeve (Pearl White)",
 ]
 
+
+def obj_get(obj, key, default=None):
+    if obj is None:
+        return default
+    try:
+        if isinstance(obj, dict):
+            return obj.get(key, default)
+        return obj[key]
+    except Exception:
+        return default
+
 def build_promotional_items(items: list, is_member: bool) -> list:
     total_10ml = 0
     total_50ml = 0
@@ -85,8 +96,8 @@ def persist_checkout_session(session_id: str):
         expand=["line_items"]
     )
 
-    payment_status = full_session.get("payment_status")
-    status = full_session.get("status")
+    payment_status = obj_get(full_session, "payment_status")
+    status = obj_get(full_session, "status")
     if payment_status != "paid" and status != "complete":
         raise HTTPException(status_code=409, detail="Checkout session is not paid yet")
 
@@ -105,19 +116,18 @@ def persist_checkout_session(session_id: str):
             "email": existing_order.data[0].get("email"),
         }
 
-    email = (
-        full_session.get("customer_details", {}).get("email")
-        or full_session.get("customer_email")
-    )
+    customer_details = obj_get(full_session, "customer_details", {})
+    email = obj_get(customer_details, "email") or obj_get(full_session, "customer_email")
     if not email:
         raise HTTPException(status_code=400, detail="No customer email found on checkout session")
 
-    amount_cents = int(full_session.get("amount_total", 0) or 0)
+    amount_cents = int(obj_get(full_session, "amount_total", 0) or 0)
     amount_sgd = amount_cents / 100
-    delivery_option = full_session.get("metadata", {}).get("delivery_option", "self")
+    metadata = obj_get(full_session, "metadata", {})
+    delivery_option = obj_get(metadata, "delivery_option", "self")
 
     try:
-        items = json.loads(full_session.get("metadata", {}).get("items", "[]"))
+        items = json.loads(obj_get(metadata, "items", "[]"))
     except Exception:
         items = []
 
