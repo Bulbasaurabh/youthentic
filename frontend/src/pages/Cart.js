@@ -568,7 +568,7 @@ const Cart = () => {
                 {freeSleeveQty > 0 && (
                   <p className="cart-gifts__item">
                     <strong>{freeSleeveQty}× free Plain Sleeve</strong> for 10ml purchases
-                    {" "}(randomly Midnight Black or Pearl White)
+                    {" "}(randomly given Midnight Black or Pearl White)
                   </p>
                 )}
                 {freeTesterQty > 0 && (

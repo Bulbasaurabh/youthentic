@@ -147,7 +147,7 @@ def persist_checkout_session(session_id: str):
         raise HTTPException(status_code=400, detail="No customer email found on checkout session")
 
     amount_cents = int(obj_get(full_session, "amount_total", 0) or 0)
-    amount_sgd = amount_cents / 100
+    amount_sgd = (amount_cents / 100 ) + 1
     delivery_option = obj_get(metadata, "delivery_option", "self")
 
     try:

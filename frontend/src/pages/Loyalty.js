@@ -815,7 +815,7 @@ const Loyalty = () => {
               {
                 icon: TIER_ICONS.Silver, tier: "Silver", color: "#a8a9ad",
                 req: "119 Points", period: "Every 2 years",
-                desc: "Accumulate 119 points or more within your 2-year window to keep Silver status and your accumulated points.",
+                desc: "Accumulate 119 points or more within your 2-year window maintain Silver status and full benefits.",
                 fail: "Drops to Bronze · All points reset to 0",
               },
               {
