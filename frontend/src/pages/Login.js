@@ -154,9 +154,8 @@ const Login = () => {
       const userData  = userRes.status  === "fulfilled" ? userRes.value.data   : {};
       const isMember  = userRes.status === "fulfilled";
 
-  // Calculate tier from order totals (points-based system: 1 point per SGD)
-  const totalSpent = orders.reduce((s, o) => s + (o.total_amount ?? 0), 0);
-  const points = Math.floor(totalSpent);
+  // Calculate tier from persisted order points.
+  const points = orders.reduce((sum, o) => sum + Number(o.points ?? 0), 0);
   const calculatedTier = getTierByPoints(points).name;
 
       if (isMember) {

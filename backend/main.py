@@ -147,7 +147,7 @@ def persist_checkout_session(session_id: str):
         raise HTTPException(status_code=400, detail="No customer email found on checkout session")
 
     amount_cents = int(obj_get(full_session, "amount_total", 0) or 0)
-    amount_sgd = (amount_cents / 100 ) + 1
+    amount_sgd = amount_cents / 100
     delivery_option = obj_get(metadata, "delivery_option", "self")
 
     try:
@@ -155,21 +155,17 @@ def persist_checkout_session(session_id: str):
     except Exception:
         items = []
 
-    order_result = supabase.table("orders").insert({
-        "email": email,
-        "items": json.dumps(items),
-        "total_amount": int(amount_sgd),
-        "delivery_option": delivery_option,
-        "stripe_session_id": full_session["id"],
-        "payment_status": "paid",
-    }).execute()
+    # Base points come from purchasable cart items only (exclude free gifts).
+    base_points = int(sum(
+        float(item.get("price", 0) or 0) * int(item.get("quantity", 0) or 0)
+        for item in items
+        if not bool(item.get("is_free_gift", False))
+    ))
 
-    user = supabase.table("users").select("*").eq("email", email).execute()
-    base_points = int(amount_sgd)  # 1 point per SGD spent before tier multiplier
-
+    user = supabase.table("users").select("loyalty_points").eq("email", email).execute()
     if user.data:
-        current_points = user.data[0]["loyalty_points"] or 0
-        multiplier = loyalty_multiplier(int(current_points))
+        current_points = int(user.data[0].get("loyalty_points") or 0)
+        multiplier = loyalty_multiplier(current_points)
         earned_points = int(base_points * multiplier)
         new_points = current_points + earned_points
         supabase.table("users").update({
@@ -181,6 +177,16 @@ def persist_checkout_session(session_id: str):
             "email": email,
             "loyalty_points": earned_points,
         }).execute()
+
+    order_result = supabase.table("orders").insert({
+        "email": email,
+        "items": json.dumps(items),
+        "total_amount": amount_sgd,
+        "points": earned_points,
+        "delivery_option": delivery_option,
+        "stripe_session_id": full_session["id"],
+        "payment_status": "paid",
+    }).execute()
 
     return {
         "order": (order_result.data or [None])[0],

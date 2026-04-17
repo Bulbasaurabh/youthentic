@@ -6,13 +6,13 @@
 
 export const RENEWAL_RULES = {
   Silver: {
-    requiredSpend: 120,
+    requiredPoints: 120,
     failTier:      "Bronze",
     failPoints:    0,                // reset to 0 on failure
     label:         "120 points every 2 years",
   },
   Gold: {
-    requiredSpend: 500,
+    requiredPoints: 500,
     failTier:      "Gold",
     failPoints:    0,              // reset to 0 on failure
     label:         "500 points every 2 years",
@@ -46,10 +46,10 @@ export const getCurrentWindow = (createdAt) => {
 };
 
 /**
- * Given a list of paid orders and a window, return total SGD spent.
- * total_amount in DB is stored as dollars (float).
+ * Given a list of paid orders and a window, return total points earned.
+ * Uses the points column on orders. Falls back to 0 if missing.
  */
-export const getSpendInWindow = (orders, windowStart, windowEnd) => {
+export const getPointsInWindow = (orders, windowStart, windowEnd) => {
   const paid = ["paid", "complete", "succeeded"];
   return orders
     .filter((o) => {
@@ -57,7 +57,7 @@ export const getSpendInWindow = (orders, windowStart, windowEnd) => {
       const d = new Date(o.created_at);
       return d >= windowStart && d < windowEnd;
     })
-    .reduce((sum, o) => sum + (o.total_amount ?? 0), 0); 
+    .reduce((sum, o) => sum + Number(o.points ?? 0), 0);
 };
 
 /**
@@ -70,9 +70,9 @@ export const getRenewalStatus = (tier, createdAt, orders) => {
   if (!rule || !createdAt) return null;
 
   const { windowStart, windowEnd } = getCurrentWindow(createdAt);
-  const spent     = getSpendInWindow(orders, windowStart, windowEnd);
-  const remaining = Math.max(0, rule.requiredSpend - spent);
-  const pct       = Math.min(100, Math.round((spent / rule.requiredSpend) * 100));
+  const pointsEarned = getPointsInWindow(orders, windowStart, windowEnd);
+  const remaining = Math.max(0, rule.requiredPoints - pointsEarned);
+  const pct       = Math.min(100, Math.round((pointsEarned / rule.requiredPoints) * 100));
   const isAt_risk = remaining > 0;
 
   // days until window closes
@@ -85,7 +85,7 @@ export const getRenewalStatus = (tier, createdAt, orders) => {
     rule,
     windowStart,
     windowEnd,
-    spent,
+    pointsEarned,
     remaining,
     pct,
     isAtRisk: isAt_risk,

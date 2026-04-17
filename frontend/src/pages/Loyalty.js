@@ -494,7 +494,7 @@ const Loyalty = () => {
     }
   }, [email, fetchLoyalty]);
 
-  // fetch orders to compute renewal spend — uses email from LoyaltyContext
+  // fetch orders to compute renewal points — uses email from LoyaltyContext
   useEffect(() => {
     if (!email) return;
     API.get(`/orders?email=${encodeURIComponent(email)}`)
@@ -779,10 +779,10 @@ const Loyalty = () => {
                 <div>
                   <div className="ly-renewal__bar-labels">
                     <span className="ly-renewal__bar-spent">
-                      SGD {renewal.spent.toFixed(2)} spent
+                      {Math.floor(renewal.pointsEarned)} points earned
                     </span>
                     <span className="ly-renewal__bar-required">
-                      SGD {renewal.rule.requiredSpend} required
+                      {renewal.rule.requiredPoints} points required
                     </span>
                   </div>
                   <div className="ly-renewal__bar-track">
@@ -804,8 +804,8 @@ const Loyalty = () => {
                   {renewal.pct >= 100
                     ? `✓ You've met the ${tier} renewal requirement. Your status is secure until ${renewal.expiryDateStr}.`
                     : renewal.daysLeft < 60
-                    ? `⚠ Only ${renewal.daysLeft} days left! Spend SGD ${renewal.remaining.toFixed(2)} more to keep your ${tier} status.`
-                    : `Spend SGD ${renewal.remaining.toFixed(2)} more before ${renewal.expiryDateStr} to maintain your ${tier} membership.`
+                    ? `⚠ Only ${renewal.daysLeft} days left! Earn ${Math.ceil(renewal.remaining)} more points to keep your ${tier} status.`
+                    : `Earn ${Math.ceil(renewal.remaining)} more points before ${renewal.expiryDateStr} to maintain your ${tier} membership.`
                   }
                 </div>
               </div>
@@ -847,7 +847,7 @@ const Loyalty = () => {
 
           <div className="ly-renewal__note">
             Your 2-year window is calculated from the date you first signed up.
-            Spending is counted from paid orders only. The window renews automatically
+            Points are counted from paid orders only. The window renews automatically
             at the 2-year mark — you don't need to do anything.
           </div>
         </section>
