@@ -12,8 +12,8 @@ export const RENEWAL_RULES = {
     label:         "120 points every 2 years",
   },
   Gold: {
-    requiredSpend: 250,
-    failTier:      "Bronze",
+    requiredSpend: 500,
+    failTier:      "Gold",
     failPoints:    0,              // reset to 0 on failure
     label:         "500 points every 2 years",
   },

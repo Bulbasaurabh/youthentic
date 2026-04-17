@@ -90,6 +90,18 @@ def build_promotional_items(items: list, is_member: bool) -> list:
     return promo_items
 
 
+def normalize_email(value) -> str:
+    return str(value or "").strip().lower()
+
+
+def loyalty_multiplier(points: int) -> float:
+    if points >= 500:
+        return 2.0
+    if points >= 120:
+        return 1.5
+    return 1.0
+
+
 def persist_checkout_session(session_id: str):
     full_session = stripe.checkout.Session.retrieve(
         session_id,
@@ -117,13 +129,25 @@ def persist_checkout_session(session_id: str):
         }
 
     customer_details = obj_get(full_session, "customer_details", {})
-    email = obj_get(customer_details, "email") or obj_get(full_session, "customer_email")
+    metadata = obj_get(full_session, "metadata", {})
+    email = normalize_email(
+        obj_get(customer_details, "email")
+        or obj_get(full_session, "customer_email")
+        or obj_get(metadata, "loyalty_email")
+    )
+    if not email:
+        customer_id = obj_get(full_session, "customer")
+        if customer_id:
+            try:
+                customer = stripe.Customer.retrieve(customer_id)
+                email = normalize_email(obj_get(customer, "email"))
+            except Exception:
+                email = ""
     if not email:
         raise HTTPException(status_code=400, detail="No customer email found on checkout session")
 
     amount_cents = int(obj_get(full_session, "amount_total", 0) or 0)
     amount_sgd = amount_cents / 100
-    metadata = obj_get(full_session, "metadata", {})
     delivery_option = obj_get(metadata, "delivery_option", "self")
 
     try:
@@ -141,15 +165,18 @@ def persist_checkout_session(session_id: str):
     }).execute()
 
     user = supabase.table("users").select("*").eq("email", email).execute()
-    earned_points = int(amount_sgd)  # 1 point per SGD spent
+    base_points = int(amount_sgd)  # 1 point per SGD spent before tier multiplier
 
     if user.data:
         current_points = user.data[0]["loyalty_points"] or 0
+        multiplier = loyalty_multiplier(int(current_points))
+        earned_points = int(base_points * multiplier)
         new_points = current_points + earned_points
         supabase.table("users").update({
             "loyalty_points": new_points,
         }).eq("email", email).execute()
     else:
+        earned_points = base_points
         supabase.table("users").insert({
             "email": email,
             "loyalty_points": earned_points,
@@ -184,9 +211,11 @@ def get_products():
 # -----------------------------
 @app.post("/users")
 async def create_user(user: dict):
-    email = user.get("email")
+    email = str(user.get("email") or "").strip().lower()
     if not email:
         raise HTTPException(status_code=400, detail="Email is required")
+    if "@" not in email or "." not in email.split("@")[-1]:
+        raise HTTPException(status_code=400, detail="Valid email is required")
 
     existing = supabase.table("users").select("*").eq("email", email).execute()
     if existing.data:
@@ -236,6 +265,7 @@ async def create_checkout_session(data: dict):
     items           = data.get("items", [])
     delivery_option = data.get("deliveryOption", "self")
     is_member       = bool(data.get("isMember", False))
+    loyalty_email   = normalize_email(data.get("loyaltyEmail"))
 
     if not items:
         raise HTTPException(status_code=400, detail="No items in cart")
@@ -280,30 +310,49 @@ async def create_checkout_session(data: dict):
             "quantity": 1,
         })
 
-    session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        line_items=line_items,
-        mode="payment",
-        # FIX 5: store cart data in metadata so webhook can retrieve it
-        metadata={
-            "delivery_option": delivery_option,
-            "is_member": str(is_member).lower(),
-            "items": json.dumps([
-                {
-                    "name":     i["name"],
-                    "price":    i["price"],
-                    "quantity": i["quantity"],
-                    "variant":  i.get("variant", ""),
-                    "bundleSelections": i.get("bundleSelections", []),
-                }
-                for i in items
-            ] + promo_items),
-        },
-        # Collect email at checkout so we have it in the webhook
-        customer_email=None,  # leave None — Stripe will collect it on the form
-        success_url=f"{FRONTEND_URL}/success?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{FRONTEND_URL}/cancel",
-    )
+    metadata = {
+        "delivery_option": delivery_option,
+        "is_member": str(is_member).lower(),
+        "items": json.dumps([
+            {
+                "name":     i["name"],
+                "price":    i["price"],
+                "quantity": i["quantity"],
+                "variant":  i.get("variant", ""),
+                "bundleSelections": i.get("bundleSelections", []),
+            }
+            for i in items
+        ] + promo_items),
+    }
+    if loyalty_email:
+        metadata["loyalty_email"] = loyalty_email
+
+    session_params = {
+        "payment_method_types": ["card"],
+        "line_items": line_items,
+        "mode": "payment",
+        "metadata": metadata,
+        "success_url": f"{FRONTEND_URL}/success?session_id={{CHECKOUT_SESSION_ID}}",
+        "cancel_url": f"{FRONTEND_URL}/cancel",
+    }
+
+    # If loyalty email is known, bind checkout to a Stripe customer so email is locked.
+    if loyalty_email:
+        try:
+            customers = stripe.Customer.list(email=loyalty_email, limit=1)
+            if customers.data:
+                customer_id = customers.data[0].id
+            else:
+                customer_id = stripe.Customer.create(email=loyalty_email).id
+            session_params["customer"] = customer_id
+        except Exception:
+            # Fallback: still prefill email even if customer retrieval/creation fails.
+            session_params["customer_email"] = loyalty_email
+    else:
+        # Guest checkout: Stripe collects email on hosted page.
+        session_params["customer_email"] = None
+
+    session = stripe.checkout.Session.create(**session_params)
 
     # Return the hosted checkout URL — frontend redirects directly to it
     print(f"Stripe session id: {session.id}")

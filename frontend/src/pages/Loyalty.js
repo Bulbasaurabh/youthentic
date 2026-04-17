@@ -74,6 +74,41 @@ const css = `
     animation: fadeUp 0.8s ease forwards 0.45s; opacity: 0;
   }
 
+  .ly-signup {
+    position: relative; z-index: 1;
+    width: min(720px, 100%);
+    display: flex; flex-direction: column; gap: 0.8rem;
+    padding: 1rem;
+    border: 1px solid rgba(201,168,76,0.2);
+    background: rgba(0,0,0,0.45);
+    animation: fadeUp 0.8s ease forwards 0.55s; opacity: 0;
+  }
+  .ly-signup__label {
+    font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
+  }
+  .ly-signup__row { display: flex; gap: 0.6rem; align-items: center; }
+  .ly-signup__input {
+    flex: 1;
+    background: var(--panel); border: 1px solid var(--border);
+    color: var(--white); font-family: 'Jost', sans-serif; font-size: 0.82rem;
+    letter-spacing: 0.04em; padding: 0.7rem 0.85rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .ly-signup__input:focus { border-color: var(--gold); }
+  .ly-signup__btn {
+    background: var(--yellow); color: var(--black);
+    font-family: 'Jost', sans-serif; font-size: 0.76rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border: none; padding: 0.74rem 1.2rem; cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .ly-signup__btn:hover { background: var(--gold2); }
+  .ly-signup__btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .ly-signup__help { font-size: 0.74rem; color: var(--muted); line-height: 1.5; text-align: left; }
+  .ly-signup__msg { font-size: 0.74rem; color: #6dbf82; text-align: left; }
+  .ly-signup__error { font-size: 0.74rem; color: #e05a4a; text-align: left; }
+
   /* ── CURRENT STATUS CARD ────────────────────────────────────────── */
   .ly-status {
     padding: 4rem 3rem;
@@ -426,6 +461,8 @@ const css = `
     .ly-steps { grid-template-columns: 1fr; }
     .ly-tiers, .ly-how, .ly-cta { padding: 3.5rem 1.5rem; }
     .yt-footer { flex-direction: column; align-items: center; text-align: center; }
+    .ly-signup__row { flex-direction: column; align-items: stretch; }
+    .ly-signup__btn { width: 100%; }
   }
 `;
 
@@ -436,9 +473,26 @@ const TIER_ICONS = {
 };
 
 const Loyalty = () => {
-  const { points, tier, tierData, nextTier, TIERS, email } = useLoyalty();
+  const { points, tier, tierData, nextTier, TIERS, email, fetchLoyalty } = useLoyalty();
   const [orders,   setOrders]   = useState([]);
   const [createdAt, setCreatedAt] = useState(null);
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupLoading, setSignupLoading] = useState(false);
+  const [signupError, setSignupError] = useState("");
+  const [signupMsg, setSignupMsg] = useState("");
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("yt_member_profile") || "null");
+      const storedEmail = (stored?.email || "").trim();
+      if (storedEmail) {
+        setSignupEmail(storedEmail);
+        if (!email) fetchLoyalty(storedEmail);
+      }
+    } catch {
+      // ignore malformed local storage
+    }
+  }, []);
 
   // fetch orders to compute renewal spend — uses email from LoyaltyContext
   useEffect(() => {
@@ -459,6 +513,37 @@ const Loyalty = () => {
     : 100;
   const ptsToNext = nextTier ? nextTier.min - points : 0;
 
+  const handleSignup = async () => {
+    const normalizedEmail = signupEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setSignupError("Please enter a valid email address.");
+      setSignupMsg("");
+      return;
+    }
+
+    setSignupLoading(true);
+    setSignupError("");
+    setSignupMsg("");
+
+    try {
+      await API.post("/users", { email: normalizedEmail });
+
+      localStorage.setItem("yt_member_profile", JSON.stringify({
+        email: normalizedEmail,
+        tier: "Bronze",
+        isMember: true,
+        updatedAt: Date.now(),
+      }));
+
+      await fetchLoyalty(normalizedEmail);
+      setSignupMsg("Membership ready. Your account has been created.");
+    } catch (e) {
+      setSignupError(e?.response?.data?.detail || "Couldn't create your account. Please try again.");
+    } finally {
+      setSignupLoading(false);
+    }
+  };
+
   return (
     <>
       <style>{css}</style>
@@ -474,6 +559,31 @@ const Loyalty = () => {
             Every SGD you spend earns points. Points unlock tiers.
             Tiers unlock privileges that make every Youthentic purchase better.
           </p>
+
+          <div className="ly-signup">
+            <p className="ly-signup__label">Member Signup</p>
+            <div className="ly-signup__row">
+              <input
+                className="ly-signup__input"
+                type="email"
+                value={signupEmail}
+                onChange={(e) => setSignupEmail(e.target.value)}
+                placeholder="Enter your email"
+                aria-label="Email for loyalty signup"
+              />
+              <button
+                type="button"
+                className="ly-signup__btn"
+                onClick={handleSignup}
+                disabled={signupLoading}
+              >
+                {signupLoading ? "Creating..." : "Sign Up"}
+              </button>
+            </div>
+            <p className="ly-signup__help">Sign up once to create your loyalty account and start earning points.</p>
+            {signupMsg && <p className="ly-signup__msg">{signupMsg}</p>}
+            {signupError && <p className="ly-signup__error">{signupError}</p>}
+          </div>
         </section>
 
         {/* ── CURRENT STATUS ──────────────────────────────────────── */}
@@ -646,9 +756,7 @@ const Loyalty = () => {
             <p className="ly-renewal__eyebrow">Membership Maintenance</p>
             <h2 className="ly-renewal__title">KEEP YOUR<br /><span>STATUS.</span></h2>
             <p className="ly-renewal__sub">
-              To maintain Silver or Gold status, you need to meet a minimum spend
-              every 2 years from your sign-up date. If you don't hit the threshold,
-              your tier drops and points are adjusted accordingly.
+              To maintain Silver or Gold status, you’ll need to meet the minimum points requirement within each 2-year period from your sign-up date. If the threshold isn’t met, your tier drops when points reset.
             </p>
           </div>
 
@@ -714,7 +822,7 @@ const Loyalty = () => {
                 icon: TIER_ICONS.Gold, tier: "Gold", color: "#C9A84C",
                 req: "500 Points", period: "Every 2 years",
                 desc: "Accumulate 500 points within your 2-year window to maintain Gold status and full benefits.",
-                fail: "Drops to Bronze · All points reset to 0",
+                fail: "Drops to Gold · Points reset to 0",
               },
             ].map((r) => (
               <div key={r.tier} className="ly-renewal__rule">

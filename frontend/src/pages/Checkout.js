@@ -365,6 +365,7 @@ const Checkout = () => {
     memberProfile = null;
   }
   const isMember = Boolean(memberProfile?.isMember);
+  const loyaltyEmail = (memberProfile?.email || "").trim().toLowerCase();
 
   const subtotal     = cart.reduce((s, i) => s + i.price * i.quantity, 0);
   const shippingCost = deliveryOption === "delivery" ? DELIVERY_FEE : 0;
@@ -384,6 +385,7 @@ const Checkout = () => {
         items: cart,
         deliveryOption,
         isMember,
+        loyaltyEmail,
       });
       // redirectToCheckout is deprecated — use the session URL directly
       const { url } = response.data;

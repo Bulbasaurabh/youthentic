@@ -86,11 +86,12 @@ const Footer = () => (
 
         {/* SHOP */}
         <div className="yt-footer__col">
-          <p className="yt-footer__col-title">Shop</p>
+          <p className="yt-footer__col-title">Explore</p>
           <Link to="/products" className="yt-footer__link">All Scents</Link>
-          <Link to="/products" className="yt-footer__link">Web Exclusives</Link>
+          <Link to="/products#accessories" className="yt-footer__link">Personalisation</Link>
+          <Link to="/brand-story" className="yt-footer__link">Our Story</Link>
           <Link to="/quiz"     className="yt-footer__link">Scent Quiz</Link>
-          <Link to="/cart"     className="yt-footer__link">My Cart</Link>
+          
         </div>
 
         {/* ACCOUNT */}
@@ -98,13 +99,13 @@ const Footer = () => (
           <p className="yt-footer__col-title">Account</p>
           <Link to="/login"   className="yt-footer__link">Track My Order</Link>
           <Link to="/loyalty" className="yt-footer__link">Loyalty Program</Link>
-          <Link to="/brand-story#faq" className="yt-footer__link">FAQ</Link>
-          <Link to="/brand-story" className="yt-footer__link">Our Story</Link>
+          <Link to="/cart"     className="yt-footer__link">My Cart</Link>
         </div>
 
         {/* INFO */}
         <div className="yt-footer__col">
           <p className="yt-footer__col-title">Info</p>
+          <Link to="/brand-story#faq" className="yt-footer__link">FAQ</Link>
           <Link to="/brand-story#faq"      className="yt-footer__link">Returns Policy</Link>
           <a
             href="https://youthentic.vercel.app/"

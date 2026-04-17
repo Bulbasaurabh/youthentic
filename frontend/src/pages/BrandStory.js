@@ -432,7 +432,7 @@ const FAQ_DATA = {
   Loyalty: [
     { q: "How does the Youthentic Loyalty program work?", a: "Every SGD you spend earns 1 loyalty point. Points accumulate toward tiers — Bronze (0–119 pts), Silver (120–499 pts), and Gold (500+ pts). Higher tiers unlock better multipliers and exclusive benefits." },
     { q: "What are the different loyalty benefits?", a: "Visit the Loyalty page on our website for a detailed breakdown, but in general: Bronze members earn 1 point per SGD, Silver members earn 1.5 points per SGD and get early access to new releases, and Gold members earn 2 points per SGD plus free shipping on all orders." },
-    { q: "Do my points expire?", a: "Points do not expire as long as you make the minimum required purchases within a 24-month period." },
+    { q: "Does my membership status expire?", a: "Your points reset every 2 years. However, your membership tier will be maintained as long as you meet the minimum required points within each new 2-year period." },
     { q: "How do I check my points balance?", a: "Visit the Orders page on our website after completing a purchase. Your points and current tier are displayed on your profile." },
   ],
   Other: [

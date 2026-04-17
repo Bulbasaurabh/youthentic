@@ -1024,7 +1024,7 @@ const Home = () => {
         {/* bottom bar */}
         <div className="yt-hero__bottom">
           <div className="yt-hero__tagline">
-            <p>Crafted in Indonesia — Refined for Singapore.</p>
+            <p>Formulated in Barcelona — Refined for Singapore.</p>
           </div>
           <div className="yt-hero__actions">
             <button className="yt-btn-yellow" onClick={scrollToScents}>

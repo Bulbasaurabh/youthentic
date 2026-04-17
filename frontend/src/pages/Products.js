@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useState, useMemo,useCallback  } from "react";
+import { useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import Footer from "../components/Footer";
 import API from "../api/api";
@@ -90,36 +91,36 @@ const ACCESSORIES = [
   },
   {
     id: "acc-7",
-    name: "PopMart Sanrio × Youthentic Sleeve",
+    name: "Sanrio My Melody x Youthentic Sleeve",
     desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
     price: "SGD 9.90",
     tag: "Coming Soon",
     emoji: "🎨",
-    collab: "PopMart",
+    collab: "Figurine",
   },
   {
     id: "acc-8",
-    name: "PopMart Teddy Gummy × Youthentic Sleeve",
+    name: "Ninemall Teddy Gummy x Youthentic Sleeve",
     desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
     price: "SGD 9.90",
     tag: "Coming Soon",
     emoji: "🎨",
-    collab: "PopMart",
+    collab: "Figurine",
   },
   {
     id: "acc-9",
-    name: "PopMart Twinkle × Youthentic Sleeve",
+    name: "PopMart Twinkle Twinkle x Youthentic Sleeve",
     desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
     price: "SGD 9.90",
     tag: "Coming Soon",
     emoji: "🎨",
-    collab: "PopMart",
+    collab: "Figurine",
   },
 
   {
     id: "acc-10",
-    name: "Custom Sleeve Engraving",
-    desc: "Add a personal message or name to any sleeve. Perfect for gifting.",
+    name: "Custom Bottle Engraving",
+    desc: "Add a personal message or name to any 10 ml bottle. Perfect for gifting.",
     price: "SGD 8.90",
     tag: "Personalised",
     emoji: "✍️",
@@ -594,6 +595,7 @@ const SkeletonCard = () => (
  
 const Products = () => {
   const { addToCart } = useCart();
+  const location = useLocation();
   const [products,      setProducts]      = useState([]);
   const [loading,       setLoading]       = useState(true);
   const [error,         setError]         = useState(null);
@@ -609,6 +611,17 @@ const Products = () => {
       .then((res) => { setProducts(res.data); setLoading(false); })
       .catch((err) => { console.error(err); setError("Couldn't load products. Please try again."); setLoading(false); });
   }, []);
+
+  useEffect(() => {
+    if (location.hash === "#accessories") {
+      setTimeout(() => {
+        const accessoriesElement = document.getElementById("accessories");
+        if (accessoriesElement) {
+          accessoriesElement.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
  
   const categories = useMemo(() => {
     const cats = [...new Set(products.map((p) => p.category).filter(Boolean))];
@@ -788,7 +801,7 @@ const Products = () => {
       </div>
  
       {/* ACCESSORIES SECTION */}
-      <section className="pr-acc">
+      <section  className="pr-acc">
         <div className="pr-acc__header">
           <p className="pr-acc__eyebrow">Personalise Your Purchase</p>
           <h2 className="pr-acc__title">MAKE IT<br /><span>YOURS.</span></h2>
@@ -798,7 +811,7 @@ const Products = () => {
           </p>
         </div>
  
-        <div className="pr-acc__scroll-wrap">
+        <div id="accessories" className="pr-acc__scroll-wrap">
           <div className="pr-acc__scroll">
             {ACCESSORIES.map((acc) => (
               <AccCard key={acc.id} acc={acc} addToCart={addToCart} />

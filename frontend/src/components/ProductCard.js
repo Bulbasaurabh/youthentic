@@ -175,6 +175,11 @@ const css = `
     font-family: 'Jost', sans-serif; font-size: 0.6rem; letter-spacing: 0.1em;
     text-transform: uppercase; color: #888; border-radius: 2px;
   }
+  .yt-pcard__gift {
+    margin-top: 0.5rem;
+    font-size: 0.66rem; line-height: 1.5; color: #999;
+  }
+  .yt-pcard__gift strong { color: #C9A84C; font-weight: 500; }
 
   /* ── MODAL OVERLAY ────────────────────────────────────────────── */
   .yt-modal-overlay {
@@ -336,6 +341,12 @@ const css = `
   .yt-modal__vbtn-size { font-size: 0.82rem; font-weight: 500; }
   .yt-modal__vbtn-price { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.06em; color: #555; transition: color 0.2s; }
   .yt-modal__vbtn-sub { font-size: 0.6rem; letter-spacing: 0.08em; color: #555; }
+  .yt-modal__gift-note {
+    font-size: 0.72rem; color: #999; line-height: 1.6;
+    border: 1px solid rgba(201,168,76,0.14); background: rgba(201,168,76,0.05);
+    padding: 0.55rem 0.75rem;
+  }
+  .yt-modal__gift-note strong { color: #C9A84C; font-weight: 500; }
 
   /* price */
   .yt-modal__price-display { display: flex; align-items: baseline; gap: 0.75rem; }
@@ -355,6 +366,30 @@ const css = `
   .yt-modal__add.added { background: #1a1a1a; color: #C9A84C; border: 1px solid #C9A84C; pointer-events: none; }
   .yt-modal__add:disabled { background: #222; color: #555; cursor: not-allowed; transform: none; }
   .yt-modal__stock-warn { font-size: 0.72rem; color: #e05a4a; letter-spacing: 0.08em; text-align: center; }
+
+  /* quantity selector */
+  .yt-modal__qty-wrap { display: flex; align-items: center; gap: 1rem; }
+  .yt-modal__qty-label { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: #888; }
+  .yt-modal__qty-ctrl {
+    display: flex; align-items: center; border: 1px solid rgba(201,168,76,0.25); border-radius: 3px;
+  }
+  .yt-modal__qty-btn {
+    background: transparent; border: none; color: #C9A84C; cursor: pointer;
+    padding: 0.4rem 0.6rem; font-size: 1rem; transition: color 0.2s, background 0.2s;
+  }
+  .yt-modal__qty-btn:hover { background: rgba(201,168,76,0.1); }
+  .yt-modal__qty-input {
+    background: transparent; border: none; border-left: 1px solid rgba(201,168,76,0.25); border-right: 1px solid rgba(201,168,76,0.25);
+    color: #fff; text-align: center; width: 3rem; padding: 0.4rem 0.5rem;
+    font-family: 'Jost', sans-serif; font-size: 0.9rem;
+  }
+  .yt-modal__qty-input::-webkit-outer-spin-button,
+  .yt-modal__qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+  }
+  .yt-modal__qty-input[type=number] { -moz-appearance: textfield; }
+  .yt-modal__qty-input:focus { outline: none; }
+
 
   /* ── REVIEWS ───────────────────────────────────────────────────── */
   .yt-modal__reviews { display: flex; flex-direction: column; gap: 0; }
@@ -405,9 +440,10 @@ const css = `
 `;
 
 /* ─── PRODUCT MODAL ─────────────────────────────────────────────── */
-const ProductModal = ({ product, onClose, availableScents = [] }) => {
+const ProductModal = ({ product, onClose, availableScents = [], isMember = false }) => {
   const { addToCart } = useCart();
   const [variant, setVariant] = useState("10ml");
+  const [quantity, setQuantity] = useState(1);
   const [added,   setAdded]   = useState(false);
   const [imgErr,  setImgErr]  = useState(false);
   const [bundleSelections, setBundleSelections] = useState([]);
@@ -452,16 +488,21 @@ const ProductModal = ({ product, onClose, availableScents = [] }) => {
       }
 
       const signature = buildBundleSignature(bundleSelections);
-      addToCart(product, "bundle", {
-        bundleSelections,
-        customKeySuffix: signature,
-      });
+      for (let i = 0; i < quantity; i++) {
+        addToCart(product, "bundle", {
+          bundleSelections,
+          customKeySuffix: signature,
+        });
+      }
       setBundleError("");
     } else {
-      addToCart(product, variant);
+      for (let i = 0; i < quantity; i++) {
+        addToCart(product, variant);
+      }
     }
 
     setAdded(true);
+    setQuantity(1);
     setTimeout(() => setAdded(false), 2000);
   };
 
@@ -612,7 +653,21 @@ const ProductModal = ({ product, onClose, availableScents = [] }) => {
                   <span className="yt-modal__vbtn-sub">Full size</span>
                 </button>
               </div>
+              <p className="yt-modal__gift-note">
+                {variant === "50ml"
+                  ? isMember
+                    ? <><strong>Free Gift:</strong> 1.5ml tester included with every 50ml purchase.</>
+                    : <><strong>Free Gift:</strong> 1.5ml tester for members only on 50ml purchases.</>
+                  : <><strong>Free Gift:</strong> random plain sleeve included with every 10ml purchase.</>
+                }
+              </p>
             </div>
+          )}
+
+          {!isBundle && !has50ml && (
+            <p className="yt-modal__gift-note">
+              <strong>Free Gift:</strong> random plain sleeve included with every 10ml purchase.
+            </p>
           )}
 
           {/* PRICE */}
@@ -629,6 +684,32 @@ const ProductModal = ({ product, onClose, availableScents = [] }) => {
           {product.stock <= 5 && product.stock > 0 && (
             <p className="yt-modal__stock-warn">Only {product.stock} left in stock</p>
           )}
+
+          {/* QUANTITY SELECTOR */}
+          <div className="yt-modal__qty-wrap">
+            <label className="yt-modal__qty-label">Quantity</label>
+            <div className="yt-modal__qty-ctrl">
+              <button
+                className="yt-modal__qty-btn"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              >
+                −
+              </button>
+              <input
+                type="number"
+                className="yt-modal__qty-input"
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                min="1"
+              />
+              <button
+                className="yt-modal__qty-btn"
+                onClick={() => setQuantity(quantity + 1)}
+              >
+                +
+              </button>
+            </div>
+          </div>
 
           {/* ADD TO CART */}
           <button
@@ -693,6 +774,14 @@ const ProductCard = ({ product, allProducts = [] }) => {
     p?.variant_type !== "bundle" &&
     (p?.top_notes?.length || p?.middle_notes?.length || p?.base_notes?.length)
   );
+
+  let memberProfile = null;
+  try {
+    memberProfile = JSON.parse(localStorage.getItem("yt_member_profile") || "null");
+  } catch {
+    memberProfile = null;
+  }
+  const isMember = Boolean(memberProfile?.isMember);
 
   return (
     <>
@@ -767,10 +856,21 @@ const ProductCard = ({ product, allProducts = [] }) => {
               }
             </div>
           </div>
+
+          {!isBundle && (
+            <p className="yt-pcard__gift">
+              {has50ml
+                ? isMember
+                  ? <><strong>10ml:</strong> random free sleeve · <strong>50ml:</strong> free 1.5ml tester</>
+                  : <><strong>10ml:</strong> random free sleeve · <strong>50ml:</strong> free 1.5ml tester (members only)</>
+                : <><strong>10ml:</strong> random free sleeve</>
+              }
+            </p>
+          )}
         </div>
       </div>
 
-      {modalOpen && <ProductModal product={product} onClose={closeModal} availableScents={availableScents} />}
+      {modalOpen && <ProductModal product={product} onClose={closeModal} availableScents={availableScents} isMember={isMember} />}
     </>
   );
 };
