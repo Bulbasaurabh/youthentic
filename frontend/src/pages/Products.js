@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useMemo,useCallback  } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import Footer from "../components/Footer";
@@ -600,7 +600,6 @@ const Products = () => {
   const [loading,       setLoading]       = useState(true);
   const [error,         setError]         = useState(null);
   const [search,        setSearch]        = useState("");
-  const [category,      setCategory]      = useState("All");
   const [sort,          setSort]          = useState("default");
   const [showExclusive, setShowExclusive] = useState(false);
   const [showDrop,      setShowDrop]      = useState(false);
@@ -623,11 +622,6 @@ const Products = () => {
     }
   }, [location.hash]);
  
-  const categories = useMemo(() => {
-    const cats = [...new Set(products.map((p) => p.category).filter(Boolean))];
-    return ["All", ...cats];
-  }, [products]);
- 
   const displayed = useMemo(() => {
     let list = [...products];
     if (showExclusive) list = list.filter((p) => EXCLUSIVE_PRODUCTS.includes(p.name));
@@ -640,7 +634,6 @@ const Products = () => {
         p.category?.toLowerCase().includes(q)
       );
     }
-    if (category !== "All") list = list.filter((p) => p.category === category);
     if (sort === "price-asc")  list.sort((a, b) => a.price - b.price);
     if (sort === "price-desc") list.sort((a, b) => b.price - a.price);
     if (sort === "name-asc")   list.sort((a, b) => a.name.localeCompare(b.name));
@@ -652,7 +645,7 @@ const Products = () => {
       });
     }
     return list;
-  }, [products, search, category, sort, showExclusive, showDrop]);
+  }, [products, search, sort, showExclusive, showDrop]);
  
   const exclusiveCount = products.filter((p) => EXCLUSIVE_PRODUCTS.includes(p.name)).length;
   const dropCount      = products.filter((p) => WEEKEND_DROP_PRODUCTS.includes(p.name)).length;

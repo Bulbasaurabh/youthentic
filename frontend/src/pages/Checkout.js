@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../context/CartContext";
 import Footer from "../components/Footer";
 import API from "../api/api";
-
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400;500&display=swap');
@@ -354,7 +351,7 @@ const getImage = (name) => `/assets/${name}.png`;
 
 /* ── CHECKOUT ─────────────────────────────────────────────────────── */
 const Checkout = () => {
-  const { cart, deliveryOption, setDeliveryOption, finalTotal, DELIVERY_FEE } = useCart();
+  const { cart, deliveryOption, setDeliveryOption, DELIVERY_FEE } = useCart();
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState(null);
 

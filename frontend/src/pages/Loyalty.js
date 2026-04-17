@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useLoyalty, TIERS, getTierByPoints } from "../context/LoyaltyContext";
-import { getRenewalStatus, RENEWAL_RULES } from "../utils/loyaltyRenewal";
+import { useLoyalty } from "../context/LoyaltyContext";
+import { getRenewalStatus } from "../utils/loyaltyRenewal";
 import API from "../api/api";
 import Footer from "../components/Footer";
 
@@ -492,7 +492,7 @@ const Loyalty = () => {
     } catch {
       // ignore malformed local storage
     }
-  }, []);
+  }, [email, fetchLoyalty]);
 
   // fetch orders to compute renewal spend — uses email from LoyaltyContext
   useEffect(() => {
@@ -512,6 +512,9 @@ const Loyalty = () => {
     ? Math.min(100, Math.round(((points - tierData.min) / (nextTier.min - tierData.min)) * 100))
     : 100;
   const ptsToNext = nextTier ? nextTier.min - points : 0;
+  const approxSgdToNext = nextTier
+    ? Math.ceil(ptsToNext / Math.max(1, tierData.multiplier || 1))
+    : 0;
 
   const handleSignup = async () => {
     const normalizedEmail = signupEmail.trim().toLowerCase();
@@ -627,7 +630,7 @@ const Loyalty = () => {
                 </div>
                 <p className="ly-progress__hint">
                   Earn <strong>{ptsToNext} more points</strong> to reach {nextTier.name}.
-                  That's roughly <strong>SGD {ptsToNext}</strong> in purchases.
+                  That's roughly <strong>SGD {approxSgdToNext}</strong> in purchases at your current {tierData.multiplier}x tier multiplier.
                 </p>
               </div>
             ) : (

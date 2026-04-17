@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 
@@ -855,37 +854,6 @@ const css = `
   }
 `;
 
-/* ─── SAMPLE SCENT DATA ─────────────────────────────────────────── */
-const SCENTS = [
-  {
-    id: 1,
-    tag: "Signature",
-    name: "Gentleman Choice",
-    notes: "Bergamot · Cedarwood · Amber · White Musk",
-    desc: "Inspired by Barcelona evenings — bold, composed, unforgettable.",
-    price: "SGD 38",
-    priceNum: 38,
-  },
-  {
-    id: 2,
-    tag: "Tropical",
-    name: "Garden of Eden",
-    notes: "Neroli · Jasmine · Vetiver · Sandalwood",
-    desc: "The lush warmth of the tropics, captured in every spray.",
-    price: "SGD 38",
-    priceNum: 38,
-  },
-  {
-    id: 3,
-    tag: "Fresh",
-    name: "Aqua Libre",
-    notes: "Sea Salt · Grapefruit · Driftwood · Oakmoss",
-    desc: "Clean coastal air meets confident sophistication.",
-    price: "SGD 38",
-    priceNum: 38,
-  },
-];
-
 const MARQUEE_ITEMS = [
   "FORMULATED IN BARCELONA",
   "REFINED FOR SINGAPORE",
@@ -964,22 +932,7 @@ const TIER_ICONS = {
 
 /* ─── HOME COMPONENT ────────────────────────────────────────────── */
 const Home = () => {
-  const [addedIds, setAddedIds] = useState([]);
-  const [scrolled, setScrolled] = useState(false);
-  const scentsRef = useRef(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const handleAddToCart = (scent) => {
-    // Replace with: const { addToCart } = useCart(); addToCart(scent);
-    setAddedIds((prev) => [...prev, scent.id]);
-    setTimeout(() => setAddedIds((prev) => prev.filter((id) => id !== scent.id)), 1800);
-  };
 
   const scrollToScents = () => navigate("/products");
 

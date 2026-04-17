@@ -153,7 +153,7 @@ const Success = () => {
   useEffect(() => {
     // Clear cart after successful payment
     if (clearCart) clearCart();
-  }, []);
+  }, [clearCart]);
 
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
