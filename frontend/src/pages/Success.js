@@ -1,7 +1,6 @@
 import { useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import API from "../api/api";
 import Footer from "../components/Footer";
 
 const css = `
@@ -18,9 +17,12 @@ const css = `
 
   .sc-page {
     min-height: 100svh; background: var(--black);
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; padding: 4rem 2rem;
-    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .sc-main {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 4rem 2rem; position: relative; overflow: hidden;
   }
 
   /* radial glow */
@@ -147,28 +149,18 @@ const css = `
 `;
 
 const Success = () => {
-  const { clearCart } = useCart();
-  const [searchParams] = useSearchParams();
+  const { cart, clearCart } = useCart();
 
   useEffect(() => {
     // Clear cart after successful payment
     if (clearCart) clearCart();
-  }, [clearCart]);
-
-  useEffect(() => {
-    const sessionId = searchParams.get("session_id");
-    if (!sessionId) return;
-
-    API.post("/checkout/confirm", { session_id: sessionId })
-      .catch((err) => {
-        console.error("Checkout confirmation failed", err?.response?.data || err);
-      });
-  }, [searchParams]);
+  }, []);
 
   return (
     <>
       <style>{css}</style>
       <div className="sc-page">
+        <div className="sc-main">
         <div className="sc-wordmark" aria-hidden="true"><span>SUCCESS</span></div>
 
         <div className="sc-content">
@@ -215,7 +207,7 @@ const Success = () => {
             <Link to="/loyalty"  className="sc-btn-ghost">View My Points</Link>
           </div>
         </div>
-
+        </div>{/* end sc-main */}
         <Footer />
       </div>
     </>
