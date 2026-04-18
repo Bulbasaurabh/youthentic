@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+﻿import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import Footer from "../components/Footer";
@@ -92,7 +92,7 @@ const ACCESSORIES = [
   {
     id: "acc-7",
     name: "Sanrio My Melody x Youthentic Sleeve",
-    desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
+    desc: "Limited edition sleeve in collaboration with Sanrio. Collectible design.",
     price: "SGD 9.90",
     tag: "Coming Soon",
     emoji: "🎨",
@@ -101,7 +101,7 @@ const ACCESSORIES = [
   {
     id: "acc-8",
     name: "Ninemall Teddy Gummy x Youthentic Sleeve",
-    desc: "Limited edition sleeve in collaboration with PopMart. Collectible design.",
+    desc: "Limited edition sleeve in collaboration with Ninemall. Collectible design.",
     price: "SGD 9.90",
     tag: "Coming Soon",
     emoji: "🎨",
