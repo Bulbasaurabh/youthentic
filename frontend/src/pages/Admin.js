@@ -24,13 +24,26 @@ const statusClass = (s) => {
 
 const statusLabel = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "Unknown";
 
+const normalizeOrderItems = (rawItems) => {
+  if (Array.isArray(rawItems)) return rawItems;
+  if (typeof rawItems === "string") {
+    try {
+      const parsed = JSON.parse(rawItems);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
 /* ── ORDER ROW ─────────────────────────────────────────────────────── */
 const OrderRow = ({ order, onStatusUpdate }) => {
   const [open,     setOpen]     = useState(false);
   const [newStatus, setNewStatus] = useState(order.payment_status ?? "");
   const [updating,  setUpdating]  = useState(false);
 
-  const items = Array.isArray(order.items) ? order.items : [];
+  const items = normalizeOrderItems(order.items);
 
   const handleUpdate = async () => {
     setUpdating(true);

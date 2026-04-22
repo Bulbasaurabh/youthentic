@@ -447,7 +447,16 @@ def get_user_orders(email: str):
 @app.get("/admin/orders")
 def get_orders():
     response = supabase.table("orders").select("*").order("created_at", desc=True).execute()
-    return response.data
+    orders = response.data or []
+
+    for order in orders:
+        if isinstance(order.get("items"), str):
+            try:
+                order["items"] = json.loads(order["items"])
+            except Exception:
+                order["items"] = []
+
+    return orders
 
 
 # FIX 10: Add the PATCH route Admin.js needs for status updates
