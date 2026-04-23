@@ -47,7 +47,7 @@ const ACCESSORIES = [
   {
     id: "acc-3",
     name: "Plain Sleeve (Wine Red)",
-    desc: "Premium wine red sleeve for a luxurious finish.",
+    desc: "Premium wine red sleeve for a luxurious finish. Fits all 10ml bottles.",
     price: "SGD 5.90",
     tag: null,
     emoji: "✨",
@@ -56,7 +56,7 @@ const ACCESSORIES = [
   {
     id: "acc-11",
     name: "Plain Sleeve (Navy Blue)",
-    desc: "Premium navy blue sleeve for a luxurious finish.",
+    desc: "Premium navy blue sleeve for a luxurious finish. Fits all 10ml bottles.",
     price: "SGD 5.90",
     tag: null,
     emoji: "✨",
@@ -65,7 +65,7 @@ const ACCESSORIES = [
   {
     id: "acc-4",
     name: "Floral Sleeve (Sky Blue)",
-    desc: "A refreshing sky blue sleeve with a floral design.",
+    desc: "A refreshing sky blue sleeve with a floral design. Fits all 10ml bottles.",
     price: "SGD 5.90",
     tag: "Premium",
     emoji: "✨",
@@ -74,7 +74,7 @@ const ACCESSORIES = [
   {
     id: "acc-5",
     name: "Floral Sleeve (White)",
-    desc: "A clean white sleeve with a floral design.",
+    desc: "A clean white sleeve with a floral design. Fits all 10ml bottles.",
     price: "SGD 5.90",
     tag: "Premium",
     emoji: "✨",
@@ -83,7 +83,7 @@ const ACCESSORIES = [
   {
     id: "acc-6",
     name: "Bow Sleeve (Navy Blue)",
-    desc: "A sophisticated navy blue sleeve with a bow detail.",
+    desc: "A sophisticated navy blue sleeve with a bow detail. Fits all 10ml bottles.",
     price: "SGD 5.90",
     tag: "Premium",
     emoji: "✨",
@@ -256,7 +256,7 @@ const css = `
   .pr-section-label__dot--drop { background: var(--blue); }
   .pr-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1px; background: var(--border);
+    gap: 1px; background: var(--black);
   }
   .pr-exclusive-wrap { position: relative; }
   .pr-exclusive-tag {
@@ -445,7 +445,7 @@ const css = `
   .pr-state__icon { font-size: 3rem; opacity: 0.4; }
   .pr-state__title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: var(--white); }
   .pr-state__sub { font-size: 0.85rem; color: var(--muted); max-width: 36ch; line-height: 1.7; }
-  .pr-skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--border); }
+  .pr-skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--black); }
   .pr-skeleton { background: var(--dark); display: flex; flex-direction: column; }
   .pr-skeleton__img {
     width: 100%; aspect-ratio: 3/4;

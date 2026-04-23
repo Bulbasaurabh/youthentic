@@ -559,8 +559,7 @@ const Loyalty = () => {
           <p className="ly-hero__eyebrow">Youthentic Singapore · Members</p>
           <h1 className="ly-hero__title">LOYALTY<br /><span>REWARDS.</span></h1>
           <p className="ly-hero__sub">
-            Every SGD you spend earns points. Points unlock tiers.
-            Tiers unlock privileges that make every Youthentic purchase better.
+            Every SGD you spend earns points which accumulate toward tiers. Tier unlock privileges that make every Youthentic purchase better
           </p>
 
           <div className="ly-signup">

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const css = `
   .yt-footer {
@@ -45,6 +45,14 @@ const css = `
     display: inline-block;
   }
   .yt-footer__link:hover { color: #C9A84C; }
+  .yt-footer__link--btn {
+    background: none;
+    border: none;
+    padding: 0.15rem 0;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Jost', sans-serif;
+  }
   .yt-footer__link--ext {
     display: inline-flex; align-items: center; gap: 0.35rem;
   }
@@ -65,11 +73,26 @@ const css = `
   }
 `;
 
-const Footer = () => (
-  <>
-    <style>{css}</style>
-    <footer className="yt-footer">
-      <div className="yt-footer__top">
+const Footer = () => {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  const handleContactClick = () => {
+    if (pathname === "/") {
+      const section = document.getElementById("contact");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
+    navigate("/#contact");
+  };
+
+  return (
+    <>
+      <style>{css}</style>
+      <footer className="yt-footer">
+        <div className="yt-footer__top">
 
         {/* BRAND */}
         <div className="yt-footer__brand-col">
@@ -102,25 +125,29 @@ const Footer = () => (
           <Link to="/cart"     className="yt-footer__link">My Cart</Link>
         </div>
 
-        {/* INFO */}
-        <div className="yt-footer__col">
-          <p className="yt-footer__col-title">Info</p>
-          <Link to="/brand-story#faq" className="yt-footer__link">FAQ</Link>
-          <Link to="/brand-story#faq"      className="yt-footer__link">Returns Policy</Link>
-          <a
-            href="https://youthentic.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="yt-footer__link yt-footer__link--ext"
-          >
-            Indonesia Site
-          </a>
-          <Link to="/admin" className="yt-footer__link">Admin</Link>
-        </div>
+          {/* INFO */}
+          <div className="yt-footer__col">
+            <p className="yt-footer__col-title">Info</p>
+            <Link to="/brand-story#faq" className="yt-footer__link">FAQ</Link>
+            <Link to="/brand-story#faq" className="yt-footer__link">Returns Policy</Link>
+            <button type="button" className="yt-footer__link yt-footer__link--btn" onClick={handleContactClick}>
+              Contact
+            </button>
+            <a
+              href="https://youthentic.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="yt-footer__link yt-footer__link--ext"
+            >
+              Indonesia Site
+            </a>
+            <Link to="/admin" className="yt-footer__link">Admin</Link>
+          </div>
 
-      </div>
-    </footer>
-  </>
-);
+        </div>
+      </footer>
+    </>
+  );
+};
 
 export default Footer;

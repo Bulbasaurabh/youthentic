@@ -1,4 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 
 const assetUrl = (fileName) => `${process.env.PUBLIC_URL || ""}/assets/${encodeURIComponent(fileName)}`;
@@ -765,6 +766,111 @@ const css = `
     line-height: 1;
   }
 
+  /* ─── CONTACT SECTION ────────────────────────────────────────── */
+  .yt-contact {
+    background: var(--black);
+    padding: 5rem 3rem 6rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .yt-contact__eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.85rem;
+  }
+
+  .yt-contact__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 3.5vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.15;
+    color: var(--white);
+    margin-bottom: 1.75rem;
+  }
+
+  .yt-contact__title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .yt-contact__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+
+  .yt-contact__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .yt-contact__card {
+    border: 1px solid rgba(255,255,255,0.04);
+    background: linear-gradient(90deg, rgba(17,17,17,0.96), rgba(25,25,25,0.96));
+    border-radius: 10px;
+    padding: 0.95rem 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .yt-contact__icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--yellow);
+    color: var(--black);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .yt-contact__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .yt-contact__label {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--white);
+  }
+
+  .yt-contact__value {
+    font-size: 0.98rem;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.62);
+    text-decoration: none;
+    word-break: break-word;
+  }
+
+  .yt-contact__value:hover { color: var(--white); }
+
+  .yt-contact__map {
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #111;
+    min-height: 420px;
+  }
+
+  .yt-contact__iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 420px;
+    border: 0;
+    display: block;
+  }
+
   /* ─── FOOTER STRIP ────────────────────────────────────────────── */
   .yt-footer {
     background: var(--black);
@@ -850,6 +956,10 @@ const css = `
     .yt-loyalty__tier-col { padding: 1.5rem 1.5rem; min-width: 80px; }
     .yt-loyalty__tier-col-label { font-size: 0.8rem; }
     .yt-loyalty__tier-col-pts { font-size: 0.95rem; }
+    .yt-contact { padding: 3.5rem 1.5rem 4rem; }
+    .yt-contact__grid { grid-template-columns: 1fr; }
+    .yt-contact__map,
+    .yt-contact__iframe { min-height: 320px; }
     .yt-footer { flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; }
   }
 `;
@@ -930,9 +1040,48 @@ const TIER_ICONS = {
   Gold: assetUrl("Gold.png"),
 };
 
+const CONTACT_ITEMS = [
+  {
+    icon: "☎",
+    label: "Phone",
+    value: "+6285190073729",
+    href: "tel:+6285190073729",
+  },
+  {
+    icon: "◎",
+    label: "Instagram",
+    value: "@youthenticfragrance",
+    href: "https://www.instagram.com/youthenticfragrance",
+  },
+  {
+    icon: "✉",
+    label: "Email",
+    value: "youthenticperfume@gmail.com",
+    href: "mailto:youthenticperfume@gmail.com",
+  },
+  {
+    icon: "⌖",
+    label: "Location",
+    value: "Wanayasa Residence No. C12, Pasir Jaya, Bogor Barat District, Bogor City, West Java 16119, Indonesia",
+    href: "https://maps.google.com/?q=Wanayasa+Residence+No.+C12,+Pasir+Jaya,+Bogor+Barat+District,+Bogor+City,+West+Java+16119,+Indonesia",
+  },
+];
+
+const CONTACT_MAP_EMBED = "https://www.openstreetmap.org/export/embed.html?bbox=106.7649%2C-6.5748%2C106.7749%2C-6.5648&layer=mapnik&marker=-6.5698%2C106.7699";
+
 /* ─── HOME COMPONENT ────────────────────────────────────────────── */
 const Home = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash !== "#contact") return;
+    const section = document.getElementById("contact");
+    if (!section) return;
+    window.requestAnimationFrame(() => {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [location.hash]);
 
   const scrollToScents = () => navigate("/products");
 
@@ -1097,7 +1246,7 @@ const Home = () => {
             Earn points.<br />Smell better.
           </h2>
           <p className="yt-loyalty__body">
-            Every SGD spent earns you Youthentic points. Upgrade tiers for free bottles,
+            Every SGD spent earns you Youthentic points. Upgrade tiers for free samples,
             exclusive drops, and early access to limited editions.
           </p>
           <div className="yt-loyalty__tiers">
@@ -1148,6 +1297,41 @@ const Home = () => {
               <div className="yt-loyalty__tier-col-label">Gold</div>
               <div className="yt-loyalty__tier-col-pts">500+</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CONTACT ─────────────────────────────────────────────── */}
+      <section className="yt-contact" id="contact">
+        <p className="yt-contact__eyebrow">Contact</p>
+        <div className="yt-contact__grid">
+          <div className="yt-contact__cards">
+            {CONTACT_ITEMS.map((item) => (
+              <div key={item.label} className="yt-contact__card">
+                <div className="yt-contact__icon" aria-hidden="true">{item.icon}</div>
+                <div className="yt-contact__meta">
+                  <span className="yt-contact__label">{item.label}</span>
+                  <a
+                    className="yt-contact__value"
+                    href={item.href}
+                    target={item.href.startsWith("http") ? "_blank" : undefined}
+                    rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  >
+                    {item.value}
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="yt-contact__map" aria-label="Map location">
+            <iframe
+              className="yt-contact__iframe"
+              title="Youthentic location map"
+              src={CONTACT_MAP_EMBED}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
       </section>

@@ -383,7 +383,7 @@ const PILLARS = [
   },
   {
     num: "02", tag: "Premium Materials", name: "Sourced With Intention",
-    text: "We use only premium, high-quality ingredients carefully selected from Barcelona and across Southeast Asia. Each raw material is chosen for longevity, depth, and harmony with the tropical climate.",
+    text: "We use only premium, high-quality ingredients carefully selected from Barcelona. Each raw material is chosen for longevity, depth, and harmony with the tropical climate.",
   },
   {
     num: "03", tag: "Our Process", name: "Meticulous, Start to Finish",
@@ -412,14 +412,14 @@ const FAQ_DATA = {
     { q: "What is Youthentic Lite?", a: "Youthentic Lite is our pocket-sized 10ml fragrance line — designed to be travel-friendly, MRT-safe, and easy to carry throughout your day without compromising on scent quality." },
     { q: "Are Youthentic fragrances long-lasting?", a: "Yes. Our formulas are oil-based and heat-stabilised for Singapore's humidity. Depending on the scent and your skin type, you can expect 4–8 hours of wear from a single application." },
     { q: "Are the products unisex?", a: "Most of our scents are designed to be unisex or gender-neutral. Each product page includes a gender recommendation to help you choose." },
-    { q: "Are Youthentic fragrances made in-house?", a: "Yes — every fragrance is formulated in Barcelona and produced by us in Indonesia, using high-quality raw materials locally sourced." },
+    { q: "Are Youthentic fragrances made in-house?", a: "Yes — every fragrance is formulated in Barcelona and produced by us in Indonesia, using high-quality raw materials selected from Barcelona" },
     { q: "Are the products BPOM/HSA certified?", a: "Our products are produced under Indonesian BPOM-compliant standards. For Singapore customers, our formulas comply with HSA cosmetics regulations for personal fragrance." },
-    { q: "What sizes are available?", a: "We currently offer 10ml travel-size bottles and select scents in 50ml full-size. Bundle sets are also available exclusively on our website." },
+    { q: "What sizes are available?", a: "We currently offer 10ml travel-size bottles and 50ml full-size. Bundle sets are also available exclusively on our website." },
   ],
   Shipping: [
     { q: "How long does delivery take in Singapore?", a: "Standard islandwide delivery takes 3–5 business days. Self-collection is also available and is typically ready within 1–2 business days. You'll receive an email with details once your order is confirmed." },
     { q: "Are there any duties or hidden fees?", a: "No hidden fees. All prices are displayed in SGD and include GST. There are no additional duties for Singapore orders — what you see at checkout is what you pay." },
-    { q: "What are the shipping costs?", a: "Home delivery is a flat SGD 5.00. Orders above SGD 50 are eligible for free delivery, and Silver and Gold Tier members enjoy free shipping on all orders. We may offer free delivery promotions from time to time — check our homepage for the latest." },
+    { q: "What are the shipping costs?", a: "Home delivery is a flat SGD 5.00. Orders above SGD 50 are eligible for free delivery, and Silver and Gold Tier members enjoy free shipping on all orders. We may offer free delivery promotions from time to time — check our homepage for the latest update." },
     { q: "Can I change my delivery address after ordering?", a: "Please contact us as soon as possible if you need to change your address. We can update it if your order hasn't been dispatched yet." },
     { q: "How do you ensure products are protected and won’t get damaged during delivery?", a: "All orders are packed securely with protective materials and shipped in sturdy packaging to help prevent damage during delivery." },
   ],
@@ -430,10 +430,10 @@ const FAQ_DATA = {
     { q: "Is the fragrance suitable for sensitive skin?", a: "Our formulas are designed to be gentle, but we recommend patch testing on a small area if you have sensitive skin. Avoid direct contact with eyes." },
   ],
   Loyalty: [
-    { q: "How does the Youthentic Loyalty program work?", a: "Every SGD you spend earns 1 loyalty point. Points accumulate toward tiers — Bronze (0–119 pts), Silver (120–499 pts), and Gold (500+ pts). Higher tiers unlock better multipliers and exclusive benefits." },
-    { q: "What are the different loyalty benefits?", a: "Visit the Loyalty page on our website for a detailed breakdown, but in general: Bronze members earn 1 point per SGD, Silver members earn 1.5 points per SGD and get early access to new releases, and Gold members earn 2 points per SGD plus free shipping on all orders." },
-    { q: "Does my membership status expire?", a: "Your points reset every 2 years. However, your membership tier will be maintained as long as you meet the minimum required points within each new 2-year period." },
-    { q: "How do I check my points balance?", a: "Visit the Orders page on our website after completing a purchase. Your points and current tier are displayed on your profile." },
+    { q: "How does the Youthentic Loyalty program work?", a: "Every SGD you spend earns loyalty points. Points accumulate toward tiers — Bronze (0–119 pts), Silver (120–499 pts), and Gold (500+ pts). Higher tiers unlock better multipliers and exclusive benefits." },
+    { q: "What are the different loyalty benefits?", a: "Visit the Loyalty page on our website for a detailed breakdown, but in general: Bronze members earn 1 point per SGD, Silver members earn 1.5 points per SGD and get early access to new releases, and Gold members earn 2 points per SGD plus 1x free 10ml for each product launch." },
+    { q: "Does my membership status expire?", a: "Your points reset every 2 years from signup date. However, your membership tier will be maintained as long as you meet the minimum required points within each new 2-year period." },
+    { q: "How do I check my points balance?", a: "Visit the Loyalty page on our website after completing a purchase. Your points and current tier are displayed on your profile." },
   ],
   Other: [
     { q: "What payment methods do you accept?", a: "We accept all major credit and debit cards (Visa, Mastercard, Amex), as well as PayNow and GrabPay via Stripe Checkout." },
@@ -577,7 +577,7 @@ const BrandStory = () => {
           <p className="ab-split__body">
             Youthentic was founded in Indonesia — a nation whose spice trade routes shaped
             world history. That same heritage of rare botanicals and bold craftsmanship
-            lives in every pen we produce.
+            lives in every bottle we produce.
           </p>
           <div className="ab-split__stat">
             <div>

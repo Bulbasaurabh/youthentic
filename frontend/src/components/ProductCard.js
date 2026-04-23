@@ -656,9 +656,9 @@ const ProductModal = ({ product, onClose, availableScents = [], isMember = false
               <p className="yt-modal__gift-note">
                 {variant === "50ml"
                   ? isMember
-                    ? <><strong>Free Gift:</strong> 1.5ml tester included with every 50ml purchase.</>
-                    : <><strong>Free Gift:</strong> 1.5ml tester for members only on 50ml purchases.</>
-                  : <><strong>Free Gift:</strong> random plain sleeve included with every 10ml purchase.</>
+                    ? <><strong>Free Gift:</strong> 1.5ml sample included with every 50ml purchase.</>
+                    : <><strong>Free Gift:</strong> 1.5ml sample for members only on 50ml purchases.</>
+                  : <><strong>Free Gift:</strong> Random plain sleeve (Midnight Black or Pearl White) included with every 10ml purchase.</>
                 }
               </p>
             </div>
@@ -666,7 +666,7 @@ const ProductModal = ({ product, onClose, availableScents = [], isMember = false
 
           {!isBundle && !has50ml && (
             <p className="yt-modal__gift-note">
-              <strong>Free Gift:</strong> random plain sleeve included with every 10ml purchase.
+              <strong>Free Gift:</strong> Random plain sleeve (Midnight Black or Pearl White) included with every 10ml purchase.
             </p>
           )}
 
@@ -861,8 +861,8 @@ const ProductCard = ({ product, allProducts = [] }) => {
             <p className="yt-pcard__gift">
               {has50ml
                 ? isMember
-                  ? <><strong>10ml:</strong> random free sleeve · <strong>50ml:</strong> free 1.5ml tester</>
-                  : <><strong>10ml:</strong> random free sleeve · <strong>50ml:</strong> free 1.5ml tester (members only)</>
+                  ? <><strong>10ml:</strong> random free sleeve · <strong>50ml:</strong> free 1.5ml sample</>
+                  : <><strong>10ml:</strong> random free sleeve · <strong>50ml:</strong> free 1.5ml sample (members only)</>
                 : <><strong>10ml:</strong> random free sleeve</>
               }
             </p>

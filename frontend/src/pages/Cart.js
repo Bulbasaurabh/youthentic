@@ -573,12 +573,12 @@ const Cart = () => {
                 )}
                 {freeTesterQty > 0 && (
                   <p className="cart-gifts__item">
-                    <strong>{freeTesterQty}× free 1.5ml tester</strong> for 50ml purchases (member benefit)
+                    <strong>{freeTesterQty}× free 1.5ml sample</strong> for 50ml purchases (member benefit)
                   </p>
                 )}
                 {total50mlQty > 0 && !isMember && (
                   <p className="cart-gifts__note">
-                    Login as a member to unlock free 1.5ml testers on 50ml purchases.
+                    Login as a member to unlock free 1.5ml samples on 50ml purchases.
                   </p>
                 )}
               </div>
@@ -589,7 +589,7 @@ const Cart = () => {
               <span className="cart-loyalty__icon">✦</span>
               <div className="cart-loyalty__text">
                 <strong>+{loyaltyPts} Youthentic Points</strong>
-                You'll earn points on this order to redeem on future purchases.
+                You'll earn points on this order to upgrade your loyalty tier.
               </div>
             </div>
 

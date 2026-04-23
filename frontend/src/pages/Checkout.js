@@ -587,11 +587,11 @@ const Checkout = () => {
                 )}
                 {freeTesterQty > 0 && (
                   <p className="co-gifts__item">
-                    <strong>{freeTesterQty}× free 1.5ml tester</strong> for member 50ml purchases
+                    <strong>{freeTesterQty}× free 1.5ml sample</strong> for member 50ml purchases
                   </p>
                 )}
                 {total50mlQty > 0 && !isMember && (
-                  <p className="co-gifts__note">Member login required for free 1.5ml tester on 50ml purchases.</p>
+                  <p className="co-gifts__note">Member login required for free 1.5ml sample on 50ml purchases.</p>
                 )}
               </div>
             )}
@@ -601,7 +601,7 @@ const Checkout = () => {
               <span className="co-loyalty__icon">✦</span>
               <div className="co-loyalty__text">
                 <strong>+{loyaltyPts} points on this order</strong>
-                Redeemable on your next Youthentic purchase.
+                You'll earn points on this order to upgrade your loyalty tier.
               </div>
             </div>
 
