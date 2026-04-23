@@ -1056,8 +1056,8 @@ const CONTACT_ITEMS = [
   {
     icon: "✉",
     label: "Email",
-    value: "youthenticperfume@gmail.com",
-    href: "mailto:youthenticperfume@gmail.com",
+    value: "sg@youthentic.com",
+    href: "mailto:sg@youthentic.com",
   },
   {
     icon: "⌖",

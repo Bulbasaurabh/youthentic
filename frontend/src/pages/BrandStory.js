@@ -410,7 +410,7 @@ const FAQ_CATEGORIES = ["Product", "Shipping", "Usage", "Loyalty", "Other"];
 const FAQ_DATA = {
   Product: [
     { q: "What is Youthentic Lite?", a: "Youthentic Lite is our pocket-sized 10ml fragrance line — designed to be travel-friendly, MRT-safe, and easy to carry throughout your day without compromising on scent quality." },
-    { q: "Are Youthentic fragrances long-lasting?", a: "Yes. Our formulas are oil-based and heat-stabilised for Singapore's humidity. Depending on the scent and your skin type, you can expect 4–8 hours of wear from a single application." },
+    { q: "Are Youthentic fragrances long-lasting?", a: "Yes. Our formulas are oil-based and heat-stabilised for Singapore's humidity. You can expect 6–8 hours of wear from a single application." },
     { q: "Are the products unisex?", a: "Most of our scents are designed to be unisex or gender-neutral. Each product page includes a gender recommendation to help you choose." },
     { q: "Are Youthentic fragrances made in-house?", a: "Yes — every fragrance is formulated in Barcelona and produced by us in Indonesia, using high-quality raw materials selected from Barcelona" },
     { q: "Are the products BPOM/HSA certified?", a: "Our products are produced under Indonesian BPOM-compliant standards. For Singapore customers, our formulas comply with HSA cosmetics regulations for personal fragrance." },
