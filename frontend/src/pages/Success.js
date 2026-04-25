@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import Footer from "../components/Footer";
+import API from "../api/api";
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
@@ -154,6 +155,34 @@ const Success = () => {
   useEffect(() => {
     // Clear cart after successful payment
     if (clearCart) clearCart();
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if (!sessionId) return;
+
+    const persistedKey = `yt_checkout_persisted_${sessionId}`;
+    if (sessionStorage.getItem(persistedKey) === "1") return;
+
+    let cancelled = false;
+
+    const persistOrder = async () => {
+      try {
+        await API.post("/checkout/confirm", { session_id: sessionId });
+        if (!cancelled) {
+          sessionStorage.setItem(persistedKey, "1");
+        }
+      } catch (err) {
+        console.error("Checkout confirmation failed", err);
+      }
+    };
+
+    persistOrder();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
