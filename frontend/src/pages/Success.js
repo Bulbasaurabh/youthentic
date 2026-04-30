@@ -139,6 +139,61 @@ const css = `
   .sc-loyalty__text { font-size: 0.78rem; color: var(--muted); line-height: 1.5; text-align: left; }
   .sc-loyalty__text strong { color: var(--gold); display: block; }
 
+  /* feedback callout */
+  .sc-feedback {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(10,10,10,0.96), rgba(17,17,17,0.96));
+    padding: 1.25rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    text-align: center;
+    animation: fadeUp 0.8s ease forwards 0.9s;
+    opacity: 0;
+  }
+  .sc-feedback__eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .sc-feedback__text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--white);
+    font-weight: 300;
+    text-align: center;
+  }
+  .sc-feedback__text span {
+    color: var(--muted);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    display: block;
+    margin-top: 0.4rem;
+  }
+  .sc-feedback__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    align-self: center;
+    background: var(--yellow);
+    color: var(--black);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    border: none;
+    padding: 0.85rem 1.6rem;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .sc-feedback__btn:hover { background: var(--gold2); transform: translateY(-2px); }
+
   @keyframes fadeUp   { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
   @keyframes checkPop { 0% { opacity:0; transform:scale(0.5); } 70% { transform:scale(1.1); } 100% { opacity:1; transform:scale(1); } }
 
@@ -227,6 +282,15 @@ const Success = () => {
               Keep shopping to climb toward Silver and Gold — more points,
               better multipliers, exclusive discounts.
             </div>
+          </div>
+
+          <div className="sc-feedback">
+            <div className="sc-feedback__eyebrow">Feedback</div>
+            <div className="sc-feedback__text">
+              Take a minute to share how the checkout and delivery experience felt.
+              <span>Your feedback helps us keep improving the Youthentic experience.</span>
+            </div>
+            <Link to="/#contact" className="sc-feedback__btn">Give Feedback →</Link>
           </div>
 
           <div className="sc-divider" />
